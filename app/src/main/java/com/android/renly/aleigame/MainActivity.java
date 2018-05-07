@@ -1,6 +1,7 @@
 package com.android.renly.aleigame;
 
 import android.opengl.GLES20;
+import android.util.Log;
 
 import com.android.renly.aleigame.adt.AvengerSuicideException;
 import com.android.renly.aleigame.adt.Direction;
@@ -148,7 +149,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         }
     }
 
-    /* 加载 */
+    /* 加载控件*/
     @Override
     protected Scene onCreateScene() {
         this.mEngine.registerUpdateHandler(new FPSLogger());
@@ -173,7 +174,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mHero.getHead().animate(200);
 
         this.mHero.grow();
-        this.mHero.getChildByIndex(LAYER_HERO).attachChild(this.mHero);
+        this.mScene.getChildByIndex(LAYER_HERO).attachChild(this.mHero);
 
         /* A coin to approach and eat. */
         this.mCoin = new Coin(0, 0, this.mCoinTextureRegion, this.getVertexBufferObjectManager());
@@ -219,7 +220,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         }));
 
         /* The title-text. */
-        final Text titleText = new Text(0, 0, this.mFont, "Avenger\non a Phone!", new TextOptions(HorizontalAlign.CENTER), this.getVertexBufferObjectManager());
+        final Text titleText = new Text(0, 0, this.mFont, "Game\nStart!", new TextOptions(HorizontalAlign.CENTER), this.getVertexBufferObjectManager());
         titleText.setPosition((CAMERA_WIDTH - titleText.getWidth()) * 0.5f, (CAMERA_HEIGHT - titleText.getHeight()) * 0.5f);
         titleText.setScale(0.0f);
         titleText.registerEntityModifier(new ScaleModifier(2, 0.0f, 1.0f));
