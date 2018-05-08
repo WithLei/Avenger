@@ -1,7 +1,8 @@
 package com.android.renly.aleigame;
 
+import android.graphics.Color;
 import android.opengl.GLES20;
-import android.util.Log;
+import android.view.autofill.AutofillId;
 
 import com.android.renly.aleigame.adt.AvengerSuicideException;
 import com.android.renly.aleigame.adt.Direction;
@@ -24,6 +25,7 @@ import org.andengine.entity.Entity;
 import org.andengine.entity.modifier.RotationModifier;
 import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.AutoParallaxBackground;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
@@ -44,8 +46,9 @@ import java.io.IOException;
 
 public class MainActivity extends SimpleBaseGameActivity implements AvengerConstants {
     // 摄像头尺寸
-    private static final int CAMERA_WIDTH = CELLS_HORIZONTAL * CELL_WIDTH; // 640
-    private static final int CAMERA_HEIGHT = CELLS_VERTICAL * CELL_HEIGHT; // 480
+    private static final int CAMERA_WIDTH = 590;
+    private static final int CAMERA_HEIGHT = 359;
+//    private static final int CAMERA_HEIGHT = CELLS_VERTICAL * CELL_HEIGHT; // 460
     private Camera mCamera;
 
     //贴图
@@ -100,7 +103,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     @Override
     public EngineOptions onCreateEngineOptions() {
         //构建摄像机
-        this.mCamera = new Camera(0,0,CAMERA_WIDTH,CAMERA_HEIGHT);
+        this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
         // 构建Engine，全屏显示，手机方向为竖屏，按比例拉伸
         final EngineOptions engineOptions = new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mCamera);
         engineOptions.getAudioOptions().setNeedsSound(true);
@@ -112,7 +115,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     protected void onCreateResources() {
         /* Load the font we are going to use. */
         FontFactory.setAssetBasePath("font/");
-        this.mFont = FontFactory.createFromAsset(this.getFontManager(),this.getTextureManager(),512,512, TextureOptions.BILINEAR,this.getAssets(),"Plok.ttf",32,true, android.R.color.white);
+        this.mFont = FontFactory.createFromAsset(this.getFontManager(), this.getTextureManager(), 512, 512, TextureOptions.BILINEAR, this.getAssets(), "Plok.ttf", 32, true, Color.WHITE);
         this.mFont.load();
 
         BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
@@ -124,13 +127,13 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
          */
         this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),128,128);
         //Hero 脸部
-        this.mHeadTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas,this,"snake_head.png",0,0,3,1);
+        this.mHeadTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas,this,"76.jpg",0,0,2,1);
         this.mCoinTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas,this,"frog.png",0,64,3,1);
         this.mBitmapTextureAtlas.load();
 
         //背景贴图
         this.mBackgroundTexture = new BitmapTextureAtlas(this.getTextureManager(),1024,512);
-        this.mBackgroundTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBackgroundTexture,this,"snake_background.png",0,0);
+        this.mBackgroundTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBackgroundTexture,this,"background.jpg",0,0);
         this.mBackgroundTexture.load();
 
         //控制杆贴图
