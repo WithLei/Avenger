@@ -11,6 +11,8 @@ import com.android.renly.aleigame.entity.Coin;
 import com.android.renly.aleigame.entity.Hero;
 import com.android.renly.aleigame.entity.HeroHead;
 
+import org.andengine.audio.music.Music;
+import org.andengine.audio.music.MusicFactory;
 import org.andengine.audio.sound.Sound;
 import org.andengine.audio.sound.SoundFactory;
 import org.andengine.engine.camera.Camera;
@@ -73,6 +75,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     // 声音
     private Sound mGameOverSound;
     private Sound mMunchSound;
+    private Music mGameBackgroundSound;
 
     //视图层数
     private static final int LAYER_BACKGROUND = 0;
@@ -106,6 +109,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
         // 构建Engine，全屏显示，手机方向为竖屏，按比例拉伸
         final EngineOptions engineOptions = new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mCamera);
+        engineOptions.getAudioOptions().setNeedsMusic(true);
         engineOptions.getAudioOptions().setNeedsSound(true);
         return engineOptions;
     }
@@ -127,7 +131,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
          */
         this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),128,128);
         //Hero 脸部
-        this.mHeadTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas,this,"76.jpg",0,0,2,1);
+        this.mHeadTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas,this,"76.png",0,0,2,1);
         this.mCoinTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas,this,"frog.png",0,64,3,1);
         this.mBitmapTextureAtlas.load();
 
@@ -145,6 +149,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         /* Load all the sounds this game needs. */
         try {
             SoundFactory.setAssetBasePath("mfx/");
+            MusicFactory.setAssetBasePath("mfx/");
+            this.mGameBackgroundSound = MusicFactory.createMusicFromAsset(this.getMusicManager(),this,"Victory.ogg");
             this.mGameOverSound = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, "game_over.ogg");
             this.mMunchSound = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, "munch.ogg");
         } catch (final IOException e) {
@@ -245,6 +251,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mGameOverText.registerEntityModifier(new ScaleModifier(3, 0.1f, 2.0f));
         this.mGameOverText.registerEntityModifier(new RotationModifier(3, 0, 720));
 
+        this.mGameBackgroundSound.play();
+
         return this.mScene;
     }
     /*
@@ -270,10 +278,10 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
     @Override
     public synchronized void onGameCreated() {
-
     }
 
     private void onGameOver(){
+        this.mGameBackgroundSound.pause();
         this.mGameOverSound.play();
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mGameOverText);
         this.mGameRunning = false;
