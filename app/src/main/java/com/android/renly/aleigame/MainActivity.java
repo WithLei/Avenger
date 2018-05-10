@@ -2,22 +2,22 @@ package com.android.renly.aleigame;
 
 import android.graphics.Color;
 import android.opengl.GLES20;
-import android.view.autofill.AutofillId;
+import android.util.Log;
+import android.widget.Toast;
 
-import com.android.renly.aleigame.adt.AvengerSuicideException;
-import com.android.renly.aleigame.adt.Direction;
 import com.android.renly.aleigame.constants.AvengerConstants;
-import com.android.renly.aleigame.entity.Coin;
-import com.android.renly.aleigame.entity.Hero;
-import com.android.renly.aleigame.entity.HeroHead;
+import com.android.renly.aleigame.entity.Box;
+import com.android.renly.aleigame.entity.Dj;
 
 import org.andengine.audio.music.Music;
 import org.andengine.audio.music.MusicFactory;
 import org.andengine.audio.sound.Sound;
 import org.andengine.audio.sound.SoundFactory;
 import org.andengine.engine.camera.Camera;
+import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
 import org.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.andengine.engine.camera.hud.controls.DigitalOnScreenControl;
+import org.andengine.engine.handler.physics.PhysicsHandler;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
@@ -27,11 +27,11 @@ import org.andengine.entity.Entity;
 import org.andengine.entity.modifier.RotationModifier;
 import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.background.AutoParallaxBackground;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
+import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.texture.TextureOptions;
@@ -56,15 +56,21 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     //贴图
         // 人物贴图
     private BitmapTextureAtlas mBitmapTextureAtlas;
+    private BitmapTextureAtlas mBitmapBoxTextureAtlas;
     private TiledTextureRegion mHeadTextureRegion;
     private TiledTextureRegion mCoinTextureRegion;
-        // 背景贴图
+    private ITextureRegion mFaceTextureRegion;
+    private ITextureRegion mBoxTextureRegion;
+
+    // 背景贴图
     private BitmapTextureAtlas mBackgroundTexture;
     private ITextureRegion mBackgroundTextureRegion;
         // 控制杆贴图
     private BitmapTextureAtlas mOnScreenControlTexture;
     private ITextureRegion mOnScreenControlBaseTextureRegion;
     private ITextureRegion mOnScreenControlKnobTextureRegion;
+
+    private boolean mPlaceOnScreenControlsAtDifferentVerticalLocations = false;
 
     // 字体
     private Font mFont;
@@ -74,7 +80,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
     // 声音
     private Sound mGameOverSound;
-    private Sound mMunchSound;
+    private Sound[] mMunchSound;
     private Music mGameBackgroundSound;
 
     //视图层数
@@ -90,9 +96,9 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     private Text mGameOverText;
 
     // 主角对象
-    private Hero mHero;
+    private Dj face;
     // 金币对象
-    private Coin mCoin;
+    private Box mBox;
 
     // 控制杆
     private DigitalOnScreenControl mDigitalOnScreenControl;
@@ -102,13 +108,23 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     // 记录分数
     private int mScore = 0;
 
-
     @Override
     public EngineOptions onCreateEngineOptions() {
         //构建摄像机
         this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
         // 构建Engine，全屏显示，手机方向为竖屏，按比例拉伸
         final EngineOptions engineOptions = new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mCamera);
+        engineOptions.getTouchOptions().setNeedsMultiTouch(true);
+        if(MultiTouch.isSupported(this)) {
+            if(MultiTouch.isSupportedDistinct(this)) {
+//                Toast.makeText(this, "MultiTouch detected --> Both controls will work properly!", Toast.LENGTH_SHORT).show();
+            } else {
+                this.mPlaceOnScreenControlsAtDifferentVerticalLocations = true;
+                Toast.makeText(this, "MultiTouch detected, but your device has problems distinguishing between fingers.\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "Sorry your device does NOT support MultiTouch!\n\n(Falling back to SingleTouch.)\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
+        }
         engineOptions.getAudioOptions().setNeedsMusic(true);
         engineOptions.getAudioOptions().setNeedsSound(true);
         return engineOptions;
@@ -129,10 +145,13 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         TileTextureRegion通常含有一张以上的图片，每张图片都具有相同的宽高，这些图片以矩阵的形式组织起来，
         每一张都可以通过在矩阵中的位置来定位。瓦片贴图可以用来创建动画精灵、储存地图的图块。
          */
-        this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),128,128);
         //Hero 脸部
-        this.mHeadTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas,this,"76.png",0,0,2,1);
-        this.mCoinTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas,this,"frog.png",0,64,3,1);
+        this.mBitmapBoxTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 32, 32, TextureOptions.BILINEAR);
+        this.mBoxTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapBoxTextureAtlas,this,"box2.png",0,0);
+        this.mBitmapBoxTextureAtlas.load();
+
+        this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 32, 32, TextureOptions.BILINEAR);
+        this.mFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapTextureAtlas, this, "DJ.png", 0, 0);
         this.mBitmapTextureAtlas.load();
 
         //背景贴图
@@ -151,8 +170,12 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
             SoundFactory.setAssetBasePath("mfx/");
             MusicFactory.setAssetBasePath("mfx/");
             this.mGameBackgroundSound = MusicFactory.createMusicFromAsset(this.getMusicManager(),this,"Victory.ogg");
-            this.mGameOverSound = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, "game_over.ogg");
-            this.mMunchSound = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, "munch.ogg");
+            this.mGameOverSound = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, "djdie.ogg");
+            this.mMunchSound = new Sound[8];
+            for(int i = 1;i <= 6 ; i++){
+                String path = "dj" + i + ".ogg";
+                this.mMunchSound[i] = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, path);
+            }
         } catch (final IOException e) {
             Debug.e(e);
         }
@@ -168,6 +191,15 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
             this.mScene.attachChild(new Entity());
         }
 
+        int centerX = (int)(CAMERA_WIDTH - this.mFaceTextureRegion.getWidth()) / 2;
+//        centerX /= CELL_WIDTH;
+        int centerY = (int)(CAMERA_HEIGHT - this.mFaceTextureRegion.getHeight()) / 2;
+//        centerY /= CELL_HEIGHT;
+        face = new Dj(centerX, centerY, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
+        final PhysicsHandler physicsHandler = new PhysicsHandler(face);
+        face.registerUpdateHandler(physicsHandler);
+        this.mScene.getChildByIndex(LAYER_HERO).attachChild(face);
+
         /* No background color needed as we have a fullscreen background sprite. */
         this.mScene.setBackgroundEnabled(false);
         this.mScene.getChildByIndex(LAYER_BACKGROUND).attachChild(new Sprite(0, 0, this.mBackgroundTextureRegion, this.getVertexBufferObjectManager()));
@@ -178,52 +210,72 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mScoreText.setAlpha(0.5f);
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mScoreText);
 
-        /* The Hero. */
-        this.mHero = new Hero(Direction.RIGHT, 0, CELLS_VERTICAL / 2, this.mHeadTextureRegion, this.getVertexBufferObjectManager());
-        this.mHero.getHead().animate(200);
+        this.mBox = new Box(0,0,this.mBoxTextureRegion,this.getVertexBufferObjectManager());
+        this.setBoxToRandomCell();
+        this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.mBox);
 
-        this.mHero.grow();
-        this.mScene.getChildByIndex(LAYER_HERO).attachChild(this.mHero);
-
-        /* A coin to approach and eat. */
-        this.mCoin = new Coin(0, 0, this.mCoinTextureRegion, this.getVertexBufferObjectManager());
-        this.mCoin.animate(1000);
-        this.setFrogToRandomCell();
-        this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.mCoin);
-
-        /* The On-Screen Controls to control the direction of the snake. */
-        this.mDigitalOnScreenControl = new DigitalOnScreenControl(0, CAMERA_HEIGHT - this.mOnScreenControlBaseTextureRegion.getHeight(), this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new BaseOnScreenControl.IOnScreenControlListener() {
+/**
+ *  start
+ */
+        /* Velocity control (left). */
+        final float x1 = 0;
+        final float y1 = CAMERA_HEIGHT - this.mOnScreenControlBaseTextureRegion.getHeight();
+        final AnalogOnScreenControl velocityOnScreenControl = new AnalogOnScreenControl(x1, y1, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
             @Override
             public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
-                if(pValueX == 1) {
-                    MainActivity.this.mHero.setDirection(Direction.RIGHT);
-                } else if(pValueX == -1) {
-                    MainActivity.this.mHero.setDirection(Direction.LEFT);
-                } else if(pValueY == 1) {
-                    MainActivity.this.mHero.setDirection(Direction.DOWN);
-                } else if(pValueY == -1) {
-                    MainActivity.this.mHero.setDirection(Direction.UP);
-                }
+                physicsHandler.setVelocity(pValueX * 100, pValueY * 100);
+            }
+
+            @Override
+            public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl) {
+                /* Nothing. */
             }
         });
-        /* Make the controls semi-transparent. */
-        this.mDigitalOnScreenControl.getControlBase().setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        this.mDigitalOnScreenControl.getControlBase().setAlpha(0.5f);
+        velocityOnScreenControl.getControlBase().setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        velocityOnScreenControl.getControlBase().setAlpha(0.5f);
 
-        this.mScene.setChildScene(this.mDigitalOnScreenControl);
+        this.mScene.setChildScene(velocityOnScreenControl);
 
-        /* Make the Hero move every 0.5 seconds. */
-        this.mScene.registerUpdateHandler(new TimerHandler(0.5f, true, new ITimerCallback() {
+
+        /* Rotation control (right). */
+//        final float y2 = (this.mPlaceOnScreenControlsAtDifferentVerticalLocations) ? 0 : y1;
+//        final float x2 = CAMERA_WIDTH - this.mOnScreenControlBaseTextureRegion.getWidth();
+//        final AnalogOnScreenControl rotationOnScreenControl = new AnalogOnScreenControl(x2, y2, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
+//            @Override
+//            public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
+//                if(pValueX == x1 && pValueY == x1) {
+//                    face.setRotation(x1);
+//                } else {
+//                    face.setRotation(MathUtils.radToDeg((float)Math.atan2(pValueX, -pValueY)));
+//                }
+//            }
+//
+//            @Override
+//            public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl) {
+//                /* Nothing. */
+//            }
+//        });
+//        rotationOnScreenControl.getControlBase().setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+//        rotationOnScreenControl.getControlBase().setAlpha(0.5f);
+//
+//        velocityOnScreenControl.setChildScene(rotationOnScreenControl);
+
+/**
+ *  finish
+ */
+
+        /* Make the Hero move every 0.05 seconds. */
+        this.mScene.registerUpdateHandler(new TimerHandler(0.05f, true, new ITimerCallback() {
             @Override
             public void onTimePassed(final TimerHandler pTimerHandler) {
                 if(MainActivity.this.mGameRunning) {
-                    try {
-                        MainActivity.this.mHero.move();
-                    } catch (final AvengerSuicideException e) {
-                        MainActivity.this.onGameOver();
-                    }
+//                    try {
+//                        MainActivity.this.mHero.move();
+//                    } catch (final AvengerSuicideException e) {
+//                        MainActivity.this.onGameOver();
+//                    }
 
-                    MainActivity.this.handleNewSnakePosition();
+                    MainActivity.this.handleNewHeroPosition();
                 }
             }
         }));
@@ -258,21 +310,25 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     /*
      * Method
      */
-    private void setFrogToRandomCell() {
-        this.mCoin.setCell(MathUtils.random(1, CELLS_HORIZONTAL - 2), MathUtils.random(1, CELLS_VERTICAL - 2));
+    private void setBoxToRandomCell() {
+        this.mBox.setPosition(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH, MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
     }
 
-    private void handleNewSnakePosition() {
-        final HeroHead heroHead = this.mHero.getHead();
+    private void handleNewHeroPosition() {
+//        final HeroHead heroHead = this.mHero.getHead();
+        face.refresh();
+        mBox.refresh();
 
-        if(heroHead.getCellX() < 0 || heroHead.getCellX() >= CELLS_HORIZONTAL || heroHead.getCellY() < 0 || heroHead.getCellY() >= CELLS_VERTICAL) {
+        Log.e("log","X = " + (int)((face.getX()+0.5)/CELL_WIDTH)+ "   Y = " + (int)((face.getY()+0.5)/CELL_WIDTH) +
+                "; boxX = " + this.mBox.getmCellX() + " boxY = " + this.mBox.getmCellY());
+        if(face.getmCellX() < 0 || face.getmCellX() >= CELLS_HORIZONTAL || face.getmCellY() < 0 || face.getmCellY() >= CELLS_VERTICAL) {
             this.onGameOver();
-        } else if(heroHead.isInSameCell(this.mCoin)) {
+        } else if(face.isInSameCell(this.mBox)) {
             this.mScore += 50;
             this.mScoreText.setText("Score: " + this.mScore);
-            this.mHero.grow();
-            this.mMunchSound.play();
-            this.setFrogToRandomCell();
+            int index = MathUtils.random(1,6);
+            this.mMunchSound[index].play();
+            this.setBoxToRandomCell();
         }
     }
 
