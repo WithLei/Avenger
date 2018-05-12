@@ -9,7 +9,7 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import static com.android.renly.aleigame.constants.AvengerConstants.CELL_HEIGHT;
 import static com.android.renly.aleigame.constants.AvengerConstants.CELL_WIDTH;
 
-public class Dj extends Sprite{
+public class Dj extends Sprite implements mSprite{
     private int mCellX;
     private int mCellY;
     public Dj(int pX, int pY, ITextureRegion pTextureRegion, VertexBufferObjectManager pVertexBufferObjectManager) {
@@ -18,21 +18,35 @@ public class Dj extends Sprite{
         this.mCellY = pY;
     }
 
+    @Override
     public int getmCellX() {
         return this.mCellX;
     }
 
+    @Override
     public int getmCellY(){
         return this.mCellY;
     }
 
+    @Override
+    public void setmCellX(int mCellX) {
+        this.mCellX = mCellX;
+    }
+
+    @Override
+    public void setmCellY(int mCellY) {
+        this.mCellY = mCellY;
+    }
+
+    @Override
     public void refresh(){
         this.mCellX = (int)((this.getX()+0.5)/CELL_WIDTH);
         this.mCellY = (int)((this.getY()+0.5)/CELL_HEIGHT);
     }
 
-    public boolean isInSameCell(final Box box) {
+    @Override
+    public boolean isInSameCell(final mSprite mSprite) {
         refresh();
-        return mCellX == box.getmCellX() && mCellY == box.getmCellY();
+        return mCellX == mSprite.getmCellX() && mCellY == mSprite.getmCellY();
     }
 }

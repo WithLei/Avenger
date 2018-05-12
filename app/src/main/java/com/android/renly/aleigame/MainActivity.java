@@ -3,11 +3,14 @@ package com.android.renly.aleigame;
 import android.graphics.Color;
 import android.opengl.GLES20;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.renly.aleigame.constants.AvengerConstants;
 import com.android.renly.aleigame.entity.Box;
 import com.android.renly.aleigame.entity.Dj;
+import com.android.renly.aleigame.entity.Enemy;
+import com.android.renly.aleigame.entity.mSprite;
 
 import org.andengine.audio.music.Music;
 import org.andengine.audio.music.MusicFactory;
@@ -24,9 +27,11 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.Entity;
+import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.RotationModifier;
 import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.ButtonSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
@@ -57,10 +62,10 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         // 人物贴图
     private BitmapTextureAtlas mBitmapTextureAtlas;
     private BitmapTextureAtlas mBitmapBoxTextureAtlas;
-    private TiledTextureRegion mHeadTextureRegion;
-    private TiledTextureRegion mCoinTextureRegion;
+    private BitmapTextureAtlas mBitmapEnemyTextureAtlas;
     private ITextureRegion mFaceTextureRegion;
     private ITextureRegion mBoxTextureRegion;
+    private ITextureRegion mEnemyTextureRegion;
 
     // 背景贴图
     private BitmapTextureAtlas mBackgroundTexture;
@@ -69,6 +74,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     private BitmapTextureAtlas mOnScreenControlTexture;
     private ITextureRegion mOnScreenControlBaseTextureRegion;
     private ITextureRegion mOnScreenControlKnobTextureRegion;
+    private AnalogOnScreenControl velocityOnScreenControl;
 
     private boolean mPlaceOnScreenControlsAtDifferentVerticalLocations = false;
 
@@ -94,11 +100,18 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     private Text mScoreText;
     // 游戏结束提示
     private Text mGameOverText;
+    //暂停键
+    private BitmapTextureAtlas mBitmapPauseTextureAtlas;
+    private ITextureRegion mPauseTextureRegion;
 
     // 主角对象
     private Dj face;
     // 金币对象
     private Box mBox;
+    //  敌人对象
+    private Enemy enemy;
+    // 暂停按钮对象
+    private ButtonSprite mPauseBtn;
 
     // 控制杆
     private DigitalOnScreenControl mDigitalOnScreenControl;
@@ -153,6 +166,15 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 32, 32, TextureOptions.BILINEAR);
         this.mFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapTextureAtlas, this, "DJ.png", 0, 0);
         this.mBitmapTextureAtlas.load();
+
+        this.mBitmapEnemyTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),32,32,TextureOptions.BILINEAR);
+        this.mEnemyTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapEnemyTextureAtlas,this,"DJ.png",0,0);
+        this.mBitmapEnemyTextureAtlas.load();
+
+        //暂停按钮
+        this.mBitmapPauseTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),64,64,TextureOptions.BILINEAR);
+        this.mPauseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapPauseTextureAtlas,this,"pause.png",0,0);
+        this.mBitmapPauseTextureAtlas.load();
 
         //背景贴图
         this.mBackgroundTexture = new BitmapTextureAtlas(this.getTextureManager(),1024,512);
@@ -211,8 +233,23 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mScoreText);
 
         this.mBox = new Box(0,0,this.mBoxTextureRegion,this.getVertexBufferObjectManager());
-        this.setBoxToRandomCell();
+        this.setToRandomCell(mBox);
         this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.mBox);
+
+        this.mPauseBtn = new ButtonSprite(CAMERA_WIDTH - 70, 5, this.mPauseTextureRegion, this.getVertexBufferObjectManager(), new ButtonSprite.OnClickListener() {
+            @Override
+            public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                Toast.makeText(MainActivity.this,"暂停",Toast.LENGTH_SHORT).show();
+                Log.e("log","点击事件");
+            }
+        });
+        this.mPauseBtn.setEnabled(true);
+
+        this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mPauseBtn);
+
+        this.enemy = new Enemy(0,0,this.mEnemyTextureRegion,this.getVertexBufferObjectManager());
+        this.setToRandomCell(enemy);
+        this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.enemy);
 
 /**
  *  start
@@ -220,7 +257,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         /* Velocity control (left). */
         final float x1 = 0;
         final float y1 = CAMERA_HEIGHT - this.mOnScreenControlBaseTextureRegion.getHeight();
-        final AnalogOnScreenControl velocityOnScreenControl = new AnalogOnScreenControl(x1, y1, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
+        velocityOnScreenControl = new AnalogOnScreenControl(x1, y1, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
             @Override
             public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
                 physicsHandler.setVelocity(pValueX * 100, pValueY * 100);
@@ -305,19 +342,40 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
         this.mGameBackgroundSound.play();
 
+//        new Thread(){
+//            @Override
+//            public void run() {
+//                try {
+//                    sleep(10000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                onPauseGame();
+//
+//            }
+//        };
+
         return this.mScene;
     }
     /*
      * Method
      */
-    private void setBoxToRandomCell() {
-        this.mBox.setPosition(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH, MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
+//    private void changeState(final ButtonSprite.State pState){
+//        if (pState == this.mState) {
+//            return;
+//        }
+//    }
+
+    private void setToRandomCell(Sprite sprite) {
+        //再做一个防止敌人和金币同一个位置的
+        sprite.setPosition(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH, MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
     }
 
     private void handleNewHeroPosition() {
 //        final HeroHead heroHead = this.mHero.getHead();
-        face.refresh();
-        mBox.refresh();
+        this.face.refresh();
+        this.mBox.refresh();
+        this.enemy.refresh();
 
         Log.e("log","X = " + (int)((face.getX()+0.5)/CELL_WIDTH)+ "   Y = " + (int)((face.getY()+0.5)/CELL_WIDTH) +
                 "; boxX = " + this.mBox.getmCellX() + " boxY = " + this.mBox.getmCellY());
@@ -328,7 +386,9 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
             this.mScoreText.setText("Score: " + this.mScore);
             int index = MathUtils.random(1,6);
             this.mMunchSound[index].play();
-            this.setBoxToRandomCell();
+            this.setToRandomCell(this.mBox);
+        }else if(face.isInSameCell(this.enemy)) {
+            this.onGameOver();
         }
     }
 
@@ -341,5 +401,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mGameOverSound.play();
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mGameOverText);
         this.mGameRunning = false;
+        this.mScene.clearChildScene();
+
     }
 }
