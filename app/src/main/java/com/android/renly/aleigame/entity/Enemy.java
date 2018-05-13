@@ -10,11 +10,29 @@ import static com.android.renly.aleigame.constants.AvengerConstants.CELL_WIDTH;
 public class Enemy extends Sprite implements mSprite{
     private int mCellX;
     private int mCellY;
+    private int mNextX;
+    private int mNextY;
 
     public Enemy(int pX, int pY, ITextureRegion pTextureRegion, VertexBufferObjectManager pVertexBufferObjectManager) {
         super(pX, pY, pTextureRegion, pVertexBufferObjectManager);
         this.mCellX = pX;
         this.mCellY = pY;
+    }
+
+    public int getmNextX() {
+        return mNextX;
+    }
+
+    public void setmNextX(int mNextX) {
+        this.mNextX = mNextX;
+    }
+
+    public int getmNextY() {
+        return mNextY;
+    }
+
+    public void setmNextY(int mNextY) {
+        this.mNextY = mNextY;
     }
 
     @Override

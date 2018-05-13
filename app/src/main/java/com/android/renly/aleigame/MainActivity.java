@@ -1,8 +1,10 @@
 package com.android.renly.aleigame;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.opengl.GLES20;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -28,14 +30,24 @@ import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.PathModifier;
 import org.andengine.entity.modifier.RotationModifier;
 import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.scene.IOnAreaTouchListener;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.menu.MenuScene;
+import org.andengine.entity.scene.menu.item.IMenuItem;
+import org.andengine.entity.scene.menu.item.TextMenuItem;
+import org.andengine.entity.scene.menu.item.decorator.ColorMenuItemDecorator;
 import org.andengine.entity.sprite.ButtonSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
+import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontFactory;
@@ -51,10 +63,15 @@ import org.andengine.util.math.MathUtils;
 
 import java.io.IOException;
 
-public class MainActivity extends SimpleBaseGameActivity implements AvengerConstants {
+public class MainActivity extends SimpleBaseGameActivity implements AvengerConstants,MenuScene.IOnMenuItemClickListener {
     // 摄像头尺寸
     private static final int CAMERA_WIDTH = 590;
     private static final int CAMERA_HEIGHT = 359;
+
+    //暂停参数
+    protected static final int MENU_CONTINUE = 0;
+    protected static final int MENU_RESET = MENU_CONTINUE + 1;
+    protected static final int MENU_QUIT= MENU_RESET + 1;
 //    private static final int CAMERA_HEIGHT = CELLS_VERTICAL * CELL_HEIGHT; // 460
     private Camera mCamera;
 
@@ -66,7 +83,6 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     private ITextureRegion mFaceTextureRegion;
     private ITextureRegion mBoxTextureRegion;
     private ITextureRegion mEnemyTextureRegion;
-
     // 背景贴图
     private BitmapTextureAtlas mBackgroundTexture;
     private ITextureRegion mBackgroundTextureRegion;
@@ -100,6 +116,9 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     private Text mScoreText;
     // 游戏结束提示
     private Text mGameOverText;
+    //暂停菜单
+    protected MenuScene mMenuScene;
+
     //暂停键
     private BitmapTextureAtlas mBitmapPauseTextureAtlas;
     private ITextureRegion mPauseTextureRegion;
@@ -167,8 +186,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapTextureAtlas, this, "DJ.png", 0, 0);
         this.mBitmapTextureAtlas.load();
 
-        this.mBitmapEnemyTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),32,32,TextureOptions.BILINEAR);
-        this.mEnemyTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapEnemyTextureAtlas,this,"DJ.png",0,0);
+        this.mBitmapEnemyTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),45,45,TextureOptions.BILINEAR);
+        this.mEnemyTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapEnemyTextureAtlas,this,"reaper.png",0,0);
         this.mBitmapEnemyTextureAtlas.load();
 
         //暂停按钮
@@ -207,6 +226,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     @Override
     protected Scene onCreateScene() {
         this.mEngine.registerUpdateHandler(new FPSLogger());
+        this.mMenuScene = this.createMenuScene();
+
 
         this.mScene = new Scene();
         for(int i = 0;i < LAYER_COUNT;i++){
@@ -236,20 +257,65 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.setToRandomCell(mBox);
         this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.mBox);
 
+        //敌人
+        this.enemy = new Enemy(0,0,this.mEnemyTextureRegion,this.getVertexBufferObjectManager());
+        this.enemy.setmCellX(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH);
+        this.enemy.setmCellY(MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
+        this.enemy.setmNextX(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH);
+        this.enemy.setmNextY(MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
+        this.enemy.setPosition(this.enemy.getmCellX(),this.enemy.getmCellY());
+        final PathModifier.Path path = new PathModifier.Path(100).to(this.enemy.getmCellX(), this.enemy.getmCellY()).to(this.enemy.getmNextX(), this.enemy.getmNextY());
+        for(int i = 0;i < 98;i++){
+            this.enemy.setmNextX(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH);
+            this.enemy.setmNextY(MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
+            path.to(this.enemy.getmNextX(), this.enemy.getmNextY());
+        }
+        enemy.registerEntityModifier(new LoopEntityModifier(new PathModifier(100, path, null, new PathModifier.IPathModifierListener() {
+            @Override
+            public void onPathStarted(PathModifier pPathModifier, IEntity pEntity) {
+
+            }
+
+            @Override
+            public void onPathWaypointStarted(PathModifier pPathModifier, IEntity pEntity, int pWaypointIndex) {
+//                switch(pWaypointIndex){
+//                    case 0:
+//                        enemy.animate(new long[]{200, 200, 200}, 6, 8, true);
+//                        break;
+//                    case 1:
+//                        enemy.animate(new long[]{200, 200, 200}, 3, 5, true);
+//                        break;
+//                    case 2:
+//                        enemy.animate(new long[]{200, 200, 200}, 0, 2, true);
+//                        break;
+//                    case 3:
+//                        enemy.animate(new long[]{200, 200, 200}, 9, 11, true);
+//                        break;
+//                }
+            }
+
+            @Override
+            public void onPathWaypointFinished(PathModifier pPathModifier, IEntity pEntity, int pWaypointIndex) {
+
+            }
+
+            @Override
+            public void onPathFinished(PathModifier pPathModifier, IEntity pEntity) {
+
+            }
+        })));
+
+        this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.enemy);
+
         this.mPauseBtn = new ButtonSprite(CAMERA_WIDTH - 70, 5, this.mPauseTextureRegion, this.getVertexBufferObjectManager(), new ButtonSprite.OnClickListener() {
             @Override
             public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                Toast.makeText(MainActivity.this,"暂停",Toast.LENGTH_SHORT).show();
                 Log.e("log","点击事件");
+                mScene.setChildScene(mMenuScene, false, true, true);
             }
         });
-        this.mPauseBtn.setEnabled(true);
-
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mPauseBtn);
-
-        this.enemy = new Enemy(0,0,this.mEnemyTextureRegion,this.getVertexBufferObjectManager());
-        this.setToRandomCell(enemy);
-        this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.enemy);
+        this.mScene.registerTouchArea(this.mPauseBtn);
 
 /**
  *  start
@@ -321,7 +387,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         final Text titleText = new Text(0, 0, this.mFont, "Game\nStart!", new TextOptions(HorizontalAlign.CENTER), this.getVertexBufferObjectManager());
         titleText.setPosition((CAMERA_WIDTH - titleText.getWidth()) * 0.5f, (CAMERA_HEIGHT - titleText.getHeight()) * 0.5f);
         titleText.setScale(0.0f);
-        titleText.registerEntityModifier(new ScaleModifier(2, 0.0f, 1.0f));
+        titleText.registerEntityModifier(new ScaleModifier(1, 0.0f, 1.0f));
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(titleText);
 
         /* The handler that removes the title-text and starts the game. */
@@ -360,11 +426,6 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     /*
      * Method
      */
-//    private void changeState(final ButtonSprite.State pState){
-//        if (pState == this.mState) {
-//            return;
-//        }
-//    }
 
     private void setToRandomCell(Sprite sprite) {
         //再做一个防止敌人和金币同一个位置的
@@ -392,16 +453,81 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         }
     }
 
-    @Override
-    public synchronized void onGameCreated() {
-    }
-
     private void onGameOver(){
         this.mGameBackgroundSound.pause();
         this.mGameOverSound.play();
+        this.mScene.reset();
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mGameOverText);
         this.mGameRunning = false;
         this.mScene.clearChildScene();
 
+    }
+
+    @Override
+    public boolean onKeyDown(final int pKeyCode, final KeyEvent pEvent) {
+        if(pKeyCode == KeyEvent.KEYCODE_MENU && pEvent.getAction() == KeyEvent.ACTION_DOWN) {
+            if(this.mScene.hasChildScene()) {
+                /* Remove the menu and reset it. */
+                this.mMenuScene.back();
+            } else {
+                /* Attach the menu. */
+                this.mScene.setChildScene(this.mMenuScene, false, true, true);
+            }
+            return true;
+        } else {
+            return super.onKeyDown(pKeyCode, pEvent);
+        }
+    }
+
+    @Override
+    public boolean onMenuItemClicked(final MenuScene pMenuScene, final IMenuItem pMenuItem, final float pMenuItemLocalX, final float pMenuItemLocalY) {
+        switch(pMenuItem.getID()) {
+            case MENU_RESET:
+                /* Restart the animation. */
+                this.mScene.reset();
+
+                /* Remove the menu and reset it. */
+                this.mScene.clearChildScene();
+                this.mMenuScene.reset();
+                onCreateGame();
+                return true;
+            case MENU_QUIT:
+                /* End Activity. */
+                this.finish();
+                return true;
+            case MENU_CONTINUE:
+                this.mMenuScene.back();
+                this.mScene.setChildScene(velocityOnScreenControl);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // ===========================================================
+    // Methods
+    // ===========================================================
+
+    protected MenuScene createMenuScene() {
+        final MenuScene menuScene = new MenuScene(this.mCamera);
+
+        final IMenuItem resetMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_RESET, this.mFont, "RESET", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(0,0,0));
+        resetMenuItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        menuScene.addMenuItem(resetMenuItem);
+
+        final IMenuItem quitMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_QUIT, this.mFont, "QUIT", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(0,0,0));
+        quitMenuItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        menuScene.addMenuItem(quitMenuItem);
+
+        final IMenuItem continueItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_CONTINUE, this.mFont, "CONTINUE",this.getVertexBufferObjectManager()),new org.andengine.util.color.Color(1,0,0),new org.andengine.util.color.Color(0,0,0));
+        continueItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        menuScene.addMenuItem(continueItem);
+
+        menuScene.buildAnimations();
+
+        menuScene.setBackgroundEnabled(false);
+
+        menuScene.setOnMenuItemClickListener(this);
+        return menuScene;
     }
 }
