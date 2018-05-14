@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.android.renly.aleigame.constants.AvengerConstants;
 import com.android.renly.aleigame.entity.Box;
+import com.android.renly.aleigame.entity.Bullet;
 import com.android.renly.aleigame.entity.Dj;
 import com.android.renly.aleigame.entity.Enemy;
 import com.android.renly.aleigame.entity.mSprite;
@@ -80,9 +81,11 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     private BitmapTextureAtlas mBitmapTextureAtlas;
     private BitmapTextureAtlas mBitmapBoxTextureAtlas;
     private BitmapTextureAtlas mBitmapEnemyTextureAtlas;
+    private BitmapTextureAtlas mBitmapBulletTextureAtlas;
     private ITextureRegion mFaceTextureRegion;
     private ITextureRegion mBoxTextureRegion;
     private ITextureRegion mEnemyTextureRegion;
+    private TiledTextureRegion mBulletTextureRegion;
     // 背景贴图
     private BitmapTextureAtlas mBackgroundTexture;
     private ITextureRegion mBackgroundTextureRegion;
@@ -129,6 +132,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     private Box mBox;
     //  敌人对象
     private Enemy enemy;
+    // 子弹对象
+    private Bullet bullet;
     // 暂停按钮对象
     private ButtonSprite mPauseBtn;
 
@@ -190,6 +195,11 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mEnemyTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapEnemyTextureAtlas,this,"reaper.png",0,0);
         this.mBitmapEnemyTextureAtlas.load();
 
+        //子弹
+        this.mBitmapBulletTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 64, 32, TextureOptions.BILINEAR);
+        this.mBulletTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapBulletTextureAtlas, this, "face_circle_tiled.png", 0, 0, 2, 1);
+        this.mBitmapBulletTextureAtlas.load();
+
         //暂停按钮
         this.mBitmapPauseTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),64,64,TextureOptions.BILINEAR);
         this.mPauseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapPauseTextureAtlas,this,"pause.png",0,0);
@@ -234,9 +244,9 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
             this.mScene.attachChild(new Entity());
         }
 
-        int centerX = (int)(CAMERA_WIDTH - this.mFaceTextureRegion.getWidth()) / 2;
+        final int centerX = (int)(CAMERA_WIDTH - this.mFaceTextureRegion.getWidth()) / 2;
 //        centerX /= CELL_WIDTH;
-        int centerY = (int)(CAMERA_HEIGHT - this.mFaceTextureRegion.getHeight()) / 2;
+        final int centerY = (int)(CAMERA_HEIGHT - this.mFaceTextureRegion.getHeight()) / 2;
 //        centerY /= CELL_HEIGHT;
         face = new Dj(centerX, centerY, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
         final PhysicsHandler physicsHandler = new PhysicsHandler(face);
@@ -256,6 +266,10 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mBox = new Box(0,0,this.mBoxTextureRegion,this.getVertexBufferObjectManager());
         this.setToRandomCell(mBox);
         this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.mBox);
+
+        //子弹
+        this.bullet = new Bullet(face.getmCellX(),face.getmCellY(),this.mBulletTextureRegion, this.getVertexBufferObjectManager());
+        this.mScene.getChildByIndex(LAYER_HERO).attachChild(this.bullet);
 
         //敌人
         this.enemy = new Enemy(0,0,this.mEnemyTextureRegion,this.getVertexBufferObjectManager());
@@ -341,27 +355,27 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
 
         /* Rotation control (right). */
-//        final float y2 = (this.mPlaceOnScreenControlsAtDifferentVerticalLocations) ? 0 : y1;
-//        final float x2 = CAMERA_WIDTH - this.mOnScreenControlBaseTextureRegion.getWidth();
-//        final AnalogOnScreenControl rotationOnScreenControl = new AnalogOnScreenControl(x2, y2, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
-//            @Override
-//            public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
-//                if(pValueX == x1 && pValueY == x1) {
-//                    face.setRotation(x1);
-//                } else {
-//                    face.setRotation(MathUtils.radToDeg((float)Math.atan2(pValueX, -pValueY)));
-//                }
-//            }
-//
-//            @Override
-//            public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl) {
-//                /* Nothing. */
-//            }
-//        });
-//        rotationOnScreenControl.getControlBase().setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-//        rotationOnScreenControl.getControlBase().setAlpha(0.5f);
-//
-//        velocityOnScreenControl.setChildScene(rotationOnScreenControl);
+        final float y2 = (this.mPlaceOnScreenControlsAtDifferentVerticalLocations) ? 0 : y1;
+        final float x2 = CAMERA_WIDTH - this.mOnScreenControlBaseTextureRegion.getWidth();
+        final AnalogOnScreenControl rotationOnScreenControl = new AnalogOnScreenControl(x2, y2, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
+            @Override
+            public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
+                if(pValueX == x1 && pValueY == x1) {
+                    face.setRotation(x1);
+                } else {
+                    face.setRotation(MathUtils.radToDeg((float)Math.atan2(pValueX, -pValueY)));
+                }
+            }
+
+            @Override
+            public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl) {
+                /* Nothing. */
+            }
+        });
+        rotationOnScreenControl.getControlBase().setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        rotationOnScreenControl.getControlBase().setAlpha(0.5f);
+
+        velocityOnScreenControl.setChildScene(rotationOnScreenControl);
 
 /**
  *  finish
@@ -380,6 +394,15 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
                     MainActivity.this.handleNewHeroPosition();
                 }
+            }
+        }));
+
+        /*发射子弹频率为3s*/
+        this.mScene.registerUpdateHandler(new TimerHandler(3, true, new ITimerCallback() {
+            @Override
+            public void onTimePassed(final TimerHandler pTimerHandler) {
+                bullet = new Bullet(face.getmCellX(),face.getmCellY(),mBulletTextureRegion, getVertexBufferObjectManager());
+                mScene.getChildByIndex(LAYER_HERO).attachChild(bullet);
             }
         }));
 
@@ -405,6 +428,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mGameOverText.setPosition((CAMERA_WIDTH - this.mGameOverText.getWidth()) * 0.5f, (CAMERA_HEIGHT - this.mGameOverText.getHeight()) * 0.5f);
         this.mGameOverText.registerEntityModifier(new ScaleModifier(3, 0.1f, 2.0f));
         this.mGameOverText.registerEntityModifier(new RotationModifier(3, 0, 720));
+
 
         this.mGameBackgroundSound.play();
 
@@ -454,6 +478,18 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     }
 
     private void onGameOver(){
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+                    this.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                MainActivity.this.mScene.getChildByIndex(LAYER_SCORE).detachChild(mGameOverText);
+                mScene.setChildScene(mMenuScene, false, true, true);
+            }
+        }.start();
         this.mGameBackgroundSound.pause();
         this.mGameOverSound.play();
         this.mScene.reset();
@@ -489,6 +525,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 /* Remove the menu and reset it. */
                 this.mScene.clearChildScene();
                 this.mMenuScene.reset();
+                this.mScore = 0;
                 onCreateGame();
                 return true;
             case MENU_QUIT:
@@ -511,15 +548,15 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     protected MenuScene createMenuScene() {
         final MenuScene menuScene = new MenuScene(this.mCamera);
 
-        final IMenuItem resetMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_RESET, this.mFont, "RESET", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(0,0,0));
+        final IMenuItem resetMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_RESET, this.mFont, "Restart", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(0,0,0));
         resetMenuItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(resetMenuItem);
 
-        final IMenuItem quitMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_QUIT, this.mFont, "QUIT", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(0,0,0));
+        final IMenuItem quitMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_QUIT, this.mFont, "Quit", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(0,0,0));
         quitMenuItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(quitMenuItem);
 
-        final IMenuItem continueItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_CONTINUE, this.mFont, "CONTINUE",this.getVertexBufferObjectManager()),new org.andengine.util.color.Color(1,0,0),new org.andengine.util.color.Color(0,0,0));
+        final IMenuItem continueItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_CONTINUE, this.mFont, "Continue",this.getVertexBufferObjectManager()),new org.andengine.util.color.Color(1,0,0),new org.andengine.util.color.Color(0,0,0));
         continueItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(continueItem);
 
