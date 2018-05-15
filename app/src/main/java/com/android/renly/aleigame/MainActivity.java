@@ -1,11 +1,9 @@
 package com.android.renly.aleigame;
 
-import android.app.Activity;
 import android.graphics.Color;
 import android.opengl.GLES20;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.renly.aleigame.constants.AvengerConstants;
@@ -13,7 +11,6 @@ import com.android.renly.aleigame.entity.Box;
 import com.android.renly.aleigame.entity.Bullet;
 import com.android.renly.aleigame.entity.Dj;
 import com.android.renly.aleigame.entity.Enemy;
-import com.android.renly.aleigame.entity.mSprite;
 
 import org.andengine.audio.music.Music;
 import org.andengine.audio.music.MusicFactory;
@@ -35,9 +32,6 @@ import org.andengine.entity.modifier.LoopEntityModifier;
 import org.andengine.entity.modifier.PathModifier;
 import org.andengine.entity.modifier.RotationModifier;
 import org.andengine.entity.modifier.ScaleModifier;
-import org.andengine.entity.scene.IOnAreaTouchListener;
-import org.andengine.entity.scene.IOnSceneTouchListener;
-import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.menu.MenuScene;
 import org.andengine.entity.scene.menu.item.IMenuItem;
@@ -48,7 +42,6 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
-import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontFactory;
@@ -144,6 +137,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     protected boolean mGameRunning;
     // 记录分数
     private int mScore = 0;
+    //记录生命值
+    private int health = 3;
 
     @Override
     public EngineOptions onCreateEngineOptions() {
@@ -245,9 +240,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         }
 
         final int centerX = (int)(CAMERA_WIDTH - this.mFaceTextureRegion.getWidth()) / 2;
-//        centerX /= CELL_WIDTH;
         final int centerY = (int)(CAMERA_HEIGHT - this.mFaceTextureRegion.getHeight()) / 2;
-//        centerY /= CELL_HEIGHT;
         face = new Dj(centerX, centerY, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
         final PhysicsHandler physicsHandler = new PhysicsHandler(face);
         face.registerUpdateHandler(physicsHandler);
@@ -260,6 +253,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         /* The ScoreText showing how many points the pEntity scored. */
         this.mScoreText = new Text(5, 5, this.mFont, "Score: 0", "Score: XXXX".length(), this.getVertexBufferObjectManager());
         this.mScoreText.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        this.mScoreText.setWidth(30);
         this.mScoreText.setAlpha(0.5f);
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mScoreText);
 
@@ -321,6 +315,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
         this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.enemy);
 
+        //暂停按钮
         this.mPauseBtn = new ButtonSprite(CAMERA_WIDTH - 70, 5, this.mPauseTextureRegion, this.getVertexBufferObjectManager(), new ButtonSprite.OnClickListener() {
             @Override
             public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX, float pTouchAreaLocalY) {
@@ -335,6 +330,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
  *  start
  */
         /* Velocity control (left). */
+        //左控制杆
         final float x1 = 0;
         final float y1 = CAMERA_HEIGHT - this.mOnScreenControlBaseTextureRegion.getHeight();
         velocityOnScreenControl = new AnalogOnScreenControl(x1, y1, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
@@ -355,27 +351,28 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
 
         /* Rotation control (right). */
-        final float y2 = (this.mPlaceOnScreenControlsAtDifferentVerticalLocations) ? 0 : y1;
-        final float x2 = CAMERA_WIDTH - this.mOnScreenControlBaseTextureRegion.getWidth();
-        final AnalogOnScreenControl rotationOnScreenControl = new AnalogOnScreenControl(x2, y2, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
-            @Override
-            public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
-                if(pValueX == x1 && pValueY == x1) {
-                    face.setRotation(x1);
-                } else {
-                    face.setRotation(MathUtils.radToDeg((float)Math.atan2(pValueX, -pValueY)));
-                }
-            }
-
-            @Override
-            public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl) {
-                /* Nothing. */
-            }
-        });
-        rotationOnScreenControl.getControlBase().setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        rotationOnScreenControl.getControlBase().setAlpha(0.5f);
-
-        velocityOnScreenControl.setChildScene(rotationOnScreenControl);
+        //右控制杆
+//        final float y2 = (this.mPlaceOnScreenControlsAtDifferentVerticalLocations) ? 0 : y1;
+//        final float x2 = CAMERA_WIDTH - this.mOnScreenControlBaseTextureRegion.getWidth();
+//        final AnalogOnScreenControl rotationOnScreenControl = new AnalogOnScreenControl(x2, y2, this.mCamera, this.mOnScreenControlBaseTextureRegion, this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new AnalogOnScreenControl.IAnalogOnScreenControlListener() {
+//            @Override
+//            public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
+//                if(pValueX == x1 && pValueY == x1) {
+//                    face.setRotation(x1);
+//                } else {
+//                    face.setRotation(MathUtils.radToDeg((float)Math.atan2(pValueX, -pValueY)));
+//                }
+//            }
+//
+//            @Override
+//            public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl) {
+//                /* Nothing. */
+//            }
+//        });
+//        rotationOnScreenControl.getControlBase().setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+//        rotationOnScreenControl.getControlBase().setAlpha(0.5f);
+//
+//        velocityOnScreenControl.setChildScene(rotationOnScreenControl);
 
 /**
  *  finish
@@ -398,13 +395,13 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         }));
 
         /*发射子弹频率为3s*/
-        this.mScene.registerUpdateHandler(new TimerHandler(3, true, new ITimerCallback() {
-            @Override
-            public void onTimePassed(final TimerHandler pTimerHandler) {
-                bullet = new Bullet(face.getmCellX(),face.getmCellY(),mBulletTextureRegion, getVertexBufferObjectManager());
-                mScene.getChildByIndex(LAYER_HERO).attachChild(bullet);
-            }
-        }));
+//        this.mScene.registerUpdateHandler(new TimerHandler(3, true, new ITimerCallback() {
+//            @Override
+//            public void onTimePassed(final TimerHandler pTimerHandler) {
+//                bullet = new Bullet(face.getmCellX(),face.getmCellY(),mBulletTextureRegion, getVertexBufferObjectManager());
+//                mScene.getChildByIndex(LAYER_HERO).attachChild(bullet);
+//            }
+//        }));
 
         /* The title-text. */
         final Text titleText = new Text(0, 0, this.mFont, "Game\nStart!", new TextOptions(HorizontalAlign.CENTER), this.getVertexBufferObjectManager());
@@ -432,18 +429,6 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
         this.mGameBackgroundSound.play();
 
-//        new Thread(){
-//            @Override
-//            public void run() {
-//                try {
-//                    sleep(10000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                onPauseGame();
-//
-//            }
-//        };
 
         return this.mScene;
     }
@@ -451,19 +436,39 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
      * Method
      */
 
+    private void refreshBullet(){
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+                    sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                face.refresh();
+                bullet = new Bullet(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH,MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT,mBulletTextureRegion, getVertexBufferObjectManager());
+                mScene.getChildByIndex(LAYER_HERO).attachChild(bullet);
+            }
+        }.start();
+    }
+
     private void setToRandomCell(Sprite sprite) {
         //再做一个防止敌人和金币同一个位置的
         sprite.setPosition(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH, MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
     }
+
+    //受伤后缓冲时间
+    private boolean isBufferTime = false;
 
     private void handleNewHeroPosition() {
 //        final HeroHead heroHead = this.mHero.getHead();
         this.face.refresh();
         this.mBox.refresh();
         this.enemy.refresh();
+        this.bullet.refresh();
 
-        Log.e("log","X = " + (int)((face.getX()+0.5)/CELL_WIDTH)+ "   Y = " + (int)((face.getY()+0.5)/CELL_WIDTH) +
-                "; boxX = " + this.mBox.getmCellX() + " boxY = " + this.mBox.getmCellY());
+//        Log.e("log","X = " + (int)((face.getX()+0.5)/CELL_WIDTH)+ "   Y = " + (int)((face.getY()+0.5)/CELL_WIDTH) +
+//                "; boxX = " + this.mBox.getmCellX() + " boxY = " + this.mBox.getmCellY());
         if(face.getmCellX() < 0 || face.getmCellX() >= CELLS_HORIZONTAL || face.getmCellY() < 0 || face.getmCellY() >= CELLS_VERTICAL) {
             this.onGameOver();
         } else if(face.isInSameCell(this.mBox)) {
@@ -472,8 +477,30 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
             int index = MathUtils.random(1,6);
             this.mMunchSound[index].play();
             this.setToRandomCell(this.mBox);
-        }else if(face.isInSameCell(this.enemy)) {
-            this.onGameOver();
+        } else if(face.isInSameCell(this.bullet)){
+            if (this.health < 3)
+                this.health++;
+            Log.e("log","health == " + this.health);
+
+        } else if(face.isInSameCell(this.enemy) && !isBufferTime) {
+            this.health--;
+            Log.e("log","health == " + this.health);
+            isBufferTime = true;
+            //3秒缓冲时间
+            new Thread(){
+                @Override
+                public void run() {
+                    try {
+                        sleep(3000);
+                        isBufferTime = false;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+            //生命值降为0
+            if(health == 0)
+                this.onGameOver();
         }
     }
 
@@ -526,6 +553,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 this.mScene.clearChildScene();
                 this.mMenuScene.reset();
                 this.mScore = 0;
+                this.health = 3;
                 onCreateGame();
                 return true;
             case MENU_QUIT:
@@ -533,6 +561,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 this.finish();
                 return true;
             case MENU_CONTINUE:
+                if(!mGameRunning)
+                    return false;
                 this.mMenuScene.back();
                 this.mScene.setChildScene(velocityOnScreenControl);
                 return true;
@@ -548,15 +578,15 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     protected MenuScene createMenuScene() {
         final MenuScene menuScene = new MenuScene(this.mCamera);
 
-        final IMenuItem resetMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_RESET, this.mFont, "Restart", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(0,0,0));
+        final IMenuItem resetMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_RESET, this.mFont, "Restart", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(1,1,1));
         resetMenuItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(resetMenuItem);
 
-        final IMenuItem quitMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_QUIT, this.mFont, "Quit", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(0,0,0));
+        final IMenuItem quitMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_QUIT, this.mFont, "Quit", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(1,1,1));
         quitMenuItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(quitMenuItem);
 
-        final IMenuItem continueItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_CONTINUE, this.mFont, "Continue",this.getVertexBufferObjectManager()),new org.andengine.util.color.Color(1,0,0),new org.andengine.util.color.Color(0,0,0));
+        final IMenuItem continueItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_CONTINUE, this.mFont, "Continue",this.getVertexBufferObjectManager()),new org.andengine.util.color.Color(1,0,0),new org.andengine.util.color.Color(1,1,1));
         continueItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(continueItem);
 

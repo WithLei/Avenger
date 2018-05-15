@@ -34,14 +34,15 @@ public class TicketTextActivity extends SimpleBaseGameActivity{
     // Constants
     // ===========================================================
 
-    private static final int CAMERA_WIDTH = 720;
-    private static final int CAMERA_HEIGHT = 480;
+    private static final int CAMERA_WIDTH = 590;
+    private static final int CAMERA_HEIGHT = 359;
 
     // ===========================================================
     // Fields
     // ===========================================================
 
     private Font mFont;
+
 
     // ===========================================================
     // Constructors
@@ -75,7 +76,9 @@ public class TicketTextActivity extends SimpleBaseGameActivity{
         final Scene scene = new Scene();
         scene.setBackground(new Background(0.09804f, 0.6274f, 0.8784f));
 
-        final Text text = new TickerText(30, 60, this.mFont, "There are also ticker texts!\n\nYou'll see the answer to life & universe in...\n\n5 4 3 2 1...\n\n42\n\nIndeed very funny!", new TickerText.TickerTextOptions(HorizontalAlign.CENTER, 10), this.getVertexBufferObjectManager());
+        final Text text = new TickerText(0, 0, this.mFont,
+                "角色介绍：\n卢西奥：\n主角操作对象\n死神：\n搞笑艺人，主角遇到会被笑死，扣除生命值\n" +
+                        "补给箱：\n分数的象征，越多越好！\n粉色笑脸：\n神秘的笑脸，据说碰到会恢复生命值", new TickerText.TickerTextOptions(HorizontalAlign.CENTER, 15), this.getVertexBufferObjectManager());
         text.registerEntityModifier(
                 new SequenceEntityModifier(
                         new ParallelEntityModifier(
@@ -92,7 +95,7 @@ public class TicketTextActivity extends SimpleBaseGameActivity{
             @Override
             public void run() {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(10000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -29,14 +29,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation project(':andEngineAugmentedRealityExtension')
-    implementation project(':andEngineLiveWallpaperExtension')
-    implementation project(':andEngineMODPlayerExtension')
-    implementation project(':andEngineMultiplayerExtension')
-    implementation project(':andEnginePhysicsBox2DExtension')
-    implementation project(':andEngineScriptingExtension')
-    implementation project(':andEngineSVGTextureRegionExtension')
-    implementation project(':andEngineTexturePackerExtension')
-    implementation project(':andEngineTMXTiledMapExtension')
     implementation project(':andEngine')
 }
