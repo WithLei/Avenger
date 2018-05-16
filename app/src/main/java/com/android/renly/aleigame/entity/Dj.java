@@ -47,6 +47,17 @@ public class Dj extends Sprite implements mSprite{
     @Override
     public boolean isInSameCell(final mSprite mSprite) {
         refresh();
-        return mCellX == mSprite.getmCellX() && mCellY == mSprite.getmCellY();
+        if(mCellX == mSprite.getmCellX() && mCellY == mSprite.getmCellY())
+            return true;
+        else if(mCellX == mSprite.getmCellX() + 1 && mCellY == mSprite.getmCellY())
+            return true;
+        else if(mCellX == mSprite.getmCellX() - 1 && mCellY == mSprite.getmCellY())
+            return true;
+        else if(mCellX == mSprite.getmCellX() && mCellY == mSprite.getmCellY() + 1)
+            return true;
+        else if(mCellX == mSprite.getmCellX() && mCellY == mSprite.getmCellY() - 1)
+            return true;
+        else
+            return false;
     }
 }

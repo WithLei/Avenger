@@ -1,16 +1,19 @@
 package com.android.renly.aleigame.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.android.renly.aleigame.MainActivity;
 import com.android.renly.aleigame.R;
 
 public class MenuActivity extends FragmentActivity implements View.OnClickListener{
@@ -18,14 +21,18 @@ public class MenuActivity extends FragmentActivity implements View.OnClickListen
     private Button btn_hard_mode;
     private Button btn_fxxk_mode;
     private Button btn_skin;
-
+    private Button btn_leaderboard;
     private Button btn_config;
+    private int count;
+
+    private SharedPreferences sharedPreferences;
 
     private static final int LEAVE_MENUPAGE_EASY = 1;
     private static final int LEAVE_MENUPAGE_HARD = 2;
     private static final int LEAVE_MENUPAGE_FXXK = 3;
     private static final int LEAVE_MENUPAGE_SKIN = 4;
     private static final int LEAVE_MENUPAGE_CONFIG = 5;
+    private static final int LEAVE_MENUPAGE_LEADERBOARD = 6;
     //默认初始皮肤为DJ
     private String skin = "DJ";
 
@@ -37,17 +44,26 @@ public class MenuActivity extends FragmentActivity implements View.OnClickListen
             Intent intent = null;
             switch (msg.what) {
                 case LEAVE_MENUPAGE_EASY:
-                    intent = new Intent(MenuActivity.this,TicketTextActivity.class);
+                    if(count == 0)
+                        intent = new Intent(MenuActivity.this,TicketTextActivity.class);
+                    else
+                        intent = new Intent(MenuActivity.this, MainActivity.class);
                     intent.putExtra("difficulty","easy");
                     intent.putExtra("skin",skin);
                     break;
                 case LEAVE_MENUPAGE_HARD:
-                    intent = new Intent(MenuActivity.this,TicketTextActivity.class);
+                    if(count == 0)
+                        intent = new Intent(MenuActivity.this,TicketTextActivity.class);
+                    else
+                        intent = new Intent(MenuActivity.this, MainActivity.class);
                     intent.putExtra("difficulty","hard");
                     intent.putExtra("skin",skin);
                     break;
                 case LEAVE_MENUPAGE_FXXK:
-                    intent = new Intent(MenuActivity.this,TicketTextActivity.class);
+                    if(count == 0)
+                        intent = new Intent(MenuActivity.this,TicketTextActivity.class);
+                    else
+                        intent = new Intent(MenuActivity.this, MainActivity.class);
                     intent.putExtra("difficulty","fxxk");
                     intent.putExtra("skin",skin);
                     break;
@@ -57,6 +73,9 @@ public class MenuActivity extends FragmentActivity implements View.OnClickListen
                 case LEAVE_MENUPAGE_CONFIG:
                     intent = new Intent(MenuActivity.this,ConfigActivity.class);
                     intent.putExtra("skin",skin);
+                    break;
+                case LEAVE_MENUPAGE_LEADERBOARD:
+                    intent = new Intent(MenuActivity.this,LeaderboardActivity.class);
                     break;
             }
             startActivity(intent);
@@ -71,6 +90,20 @@ public class MenuActivity extends FragmentActivity implements View.OnClickListen
         setContentView(getLayoutId());
         initView();
         initListener();
+        initData();
+    }
+
+    private void initData() {
+        sharedPreferences = getSharedPreferences("count",MODE_PRIVATE);
+        count = sharedPreferences.getInt("count",0);
+        Log.d("print", String.valueOf(count));
+        //判断程序是第几次运行，如果是第一次运行则跳转到引导页面
+
+        sharedPreferences = getSharedPreferences("skin",MODE_PRIVATE);
+        skin = sharedPreferences.getString("skin","DJ");
+        Log.d("print",skin);
+        //拿到当前皮肤
+
     }
 
     private void initListener() {
@@ -79,6 +112,7 @@ public class MenuActivity extends FragmentActivity implements View.OnClickListen
         btn_fxxk_mode.setOnClickListener(this);
         btn_skin.setOnClickListener(this);
         btn_config.setOnClickListener(this);
+        btn_leaderboard.setOnClickListener(this);
     }
 
     private void initView() {
@@ -87,7 +121,7 @@ public class MenuActivity extends FragmentActivity implements View.OnClickListen
         btn_fxxk_mode = findViewById(R.id.btn_fxxk_mode);
         btn_skin = findViewById(R.id.btn_skin);
         btn_config = findViewById(R.id.btn_config);
-
+        btn_leaderboard = findViewById(R.id.btn_Leaderboard);
     }
 
     private int getLayoutId(){
@@ -111,6 +145,9 @@ public class MenuActivity extends FragmentActivity implements View.OnClickListen
                 break;
             case R.id.btn_config:
                 handler.sendEmptyMessage(LEAVE_MENUPAGE_CONFIG);
+                break;
+            case R.id.btn_Leaderboard:
+                handler.sendEmptyMessage(LEAVE_MENUPAGE_LEADERBOARD);
                 break;
         }
     }

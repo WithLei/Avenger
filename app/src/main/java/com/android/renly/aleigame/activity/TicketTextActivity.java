@@ -1,6 +1,7 @@
 package com.android.renly.aleigame.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.opengl.GLES20;
 
@@ -43,6 +44,9 @@ public class TicketTextActivity extends SimpleBaseGameActivity{
 
     private Font mFont;
 
+    private String difficulty;
+    private String skin;
+
 
     // ===========================================================
     // Constructors
@@ -65,6 +69,15 @@ public class TicketTextActivity extends SimpleBaseGameActivity{
 
     @Override
     public void onCreateResources() {
+        Intent intent = getIntent();
+        difficulty = intent.getStringExtra("difficulty");
+        skin = intent.getStringExtra("skin");
+        SharedPreferences sharedPreferences = getSharedPreferences("count",MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        //存入数据
+        editor.putInt("count",1);
+        //提交修改
+        editor.commit();
         this.mFont = FontFactory.create(this.getFontManager(), this.getTextureManager(), 256, 256, TextureOptions.BILINEAR, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), 32);
         this.mFont.load();
     }
@@ -99,7 +112,10 @@ public class TicketTextActivity extends SimpleBaseGameActivity{
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                startActivity(new Intent(TicketTextActivity.this, MainActivity.class));
+                Intent mainIntent = new Intent(TicketTextActivity.this, MainActivity.class);
+                mainIntent.putExtra("difficulty",difficulty);
+                mainIntent.putExtra("skin",skin);
+                startActivity(mainIntent);
                 finish();
             }
         }.start();
@@ -113,4 +129,5 @@ public class TicketTextActivity extends SimpleBaseGameActivity{
     // ===========================================================
     // Inner and Anonymous Classes
     // ===========================================================
+
 }

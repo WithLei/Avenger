@@ -5,6 +5,9 @@ import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
+import static com.android.renly.aleigame.constants.AvengerConstants.CELL_HEIGHT;
+import static com.android.renly.aleigame.constants.AvengerConstants.CELL_WIDTH;
+
 public class Bullet extends AnimatedSprite implements mSprite{
     private final PhysicsHandler mPhysicsHandler;
     private static final float DEMO_VELOCITY = 100.0f;
@@ -62,8 +65,8 @@ public class Bullet extends AnimatedSprite implements mSprite{
 
     @Override
     public void refresh() {
-        this.mCellX = (int)this.getX();
-        this.mCellY = (int)this.getY();
+        this.mCellX = (int)((this.getX()+0.5)/CELL_WIDTH);
+        this.mCellY = (int)((this.getY()+0.5)/CELL_HEIGHT);
     }
 
     @Override

@@ -38,6 +38,7 @@
         </activity>
         <activity android:name=".activity.SkinActivity" />
         <activity android:name=".activity.ConfigActivity" />
+        <activity android:name=".activity.LeaderboardActivity"/>
     </application>
 
 </manifest>
