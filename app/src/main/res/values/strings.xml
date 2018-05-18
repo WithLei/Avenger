@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Avenger</string>
+    <string name="username">爱吃鸡魔人</string>
+    <string name="inputyourname">"请输入昵称"</string>
 </resources>

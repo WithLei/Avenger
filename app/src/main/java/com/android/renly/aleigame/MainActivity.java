@@ -3,10 +3,17 @@ package com.android.renly.aleigame;
 import android.content.Intent;
 import android.graphics.Color;
 import android.opengl.GLES20;
+import android.os.Looper;
+import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.color.ColorChooserDialog;
+import com.afollestad.materialdialogs.folderselector.FileChooserDialog;
+import com.afollestad.materialdialogs.folderselector.FolderChooserDialog;
 import com.android.renly.aleigame.constants.AvengerConstants;
 import com.android.renly.aleigame.entity.Box;
 import com.android.renly.aleigame.entity.Bullet;
@@ -58,6 +65,9 @@ import org.andengine.util.debug.Debug;
 import org.andengine.util.math.MathUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class MainActivity extends SimpleBaseGameActivity implements AvengerConstants,MenuScene.IOnMenuItemClickListener {
     // 摄像头尺寸
@@ -300,8 +310,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.mBox);
 
         //子弹
-//        this.bullet = new Bullet(face.getmCellX(),face.getmCellY(),this.mBulletTextureRegion, this.getVertexBufferObjectManager());
-//        this.mScene.getChildByIndex(LAYER_HERO).attachChild(this.bullet);
+        this.bullet = new Bullet(face.getmCellX(),face.getmCellY(),this.mBulletTextureRegion, this.getVertexBufferObjectManager());
+        this.mScene.getChildByIndex(LAYER_HERO).attachChild(this.bullet);
 
         //敌人
         this.enemy = new Enemy(0,0,this.mEnemyTextureRegion,this.getVertexBufferObjectManager());
@@ -493,7 +503,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
         this.mGameBackgroundSound.play();
 
-        refreshBullet();
+//        refreshBullet();
 
         return this.mScene;
     }
@@ -608,23 +618,25 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         }.start();
     }
 
-    private void detachSprite(Sprite mSprite) {
-        if(mSprite == null){
-            return ;
-        }
+
+
+    private void detachSprite(final Sprite mSprite) {
+                if(mSprite == null){
+                    return ;
+                }
 //先将引擎锁起来，再删除，删除后，再释放锁。为了解决同步的问题
 //得到引擎锁
-        Engine.EngineLock engineLock = this.mEngine.getEngineLock();
+               final Engine.EngineLock engineLock = MainActivity.this.getEngine().getEngineLock();
 //将引擎锁锁住
-        engineLock.lock();
+                engineLock.lock();
 //从场景中删除该精灵
-        mScene.getChildByIndex(LAYER_HERO).detachChild(mSprite);
+                mScene.getChildByIndex(LAYER_HERO).detachChild(mSprite);
 //销毁
-//        mSprite.dispose();
+                mSprite.dispose();
 //置空
-        mSprite = null;
+//                mSprite = null;
 //解锁
-        engineLock.unlock();
+                engineLock.unlock();
 
         refreshBullet();
     }
@@ -640,6 +652,9 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 }
                 MainActivity.this.mScene.getChildByIndex(LAYER_SCORE).detachChild(mGameOverText);
                 mScene.setChildScene(mMenuScene, false, true, true);
+                Looper.prepare();
+                showInputDialogCustomInvalidation();
+                Looper.loop();
             }
         }.start();
         this.mGameBackgroundSound.pause();
@@ -726,6 +741,35 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         menuScene.setBackgroundEnabled(false);
 
         menuScene.setOnMenuItemClickListener(this);
+
         return menuScene;
     }
+
+    public void showInputDialogCustomInvalidation() {
+        new MaterialDialog.Builder(MainActivity.this)
+                .title("新高分")
+                .content("请输入昵称")
+                .inputType(
+                        InputType.TYPE_CLASS_TEXT
+                                | InputType.TYPE_TEXT_VARIATION_PERSON_NAME
+                                | InputType.TYPE_TEXT_FLAG_CAP_WORDS)
+                .positiveText("确认")
+                .alwaysCallInputCallback() // this forces the callback to be invoked with every input change
+                .input(
+                        R.string.username,
+                        0,
+                        false,
+                        (dialog,input) -> {
+                            if (input.toString().equalsIgnoreCase("hello")) {
+                                dialog.setContent("I told you not to type that!");
+                                dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+                            } else {
+                                dialog.setContent(R.string.inputyourname);
+                                dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
+                            }
+                        }
+                )
+                .show();
+    }
+
 }
