@@ -310,8 +310,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.mBox);
 
         //子弹
-        this.bullet = new Bullet(face.getmCellX(),face.getmCellY(),this.mBulletTextureRegion, this.getVertexBufferObjectManager());
-        this.mScene.getChildByIndex(LAYER_HERO).attachChild(this.bullet);
+//        this.bullet = new Bullet(face.getmCellX(),face.getmCellY(),this.mBulletTextureRegion, this.getVertexBufferObjectManager());
+//        this.mScene.getChildByIndex(LAYER_HERO).attachChild(this.bullet);
 
         //敌人
         this.enemy = new Enemy(0,0,this.mEnemyTextureRegion,this.getVertexBufferObjectManager());
@@ -554,7 +554,28 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
             this.setToRandomCell(this.mBox);
         } else if(this.bullet != null && face.isInSameCell(this.bullet) && !isBufferTime){
             Log.e("bullet","refresh");
-            this.detachSprite(this.bullet);
+        //detach sprite
+            runOnUpdateThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(bullet == null){
+                        return ;
+                    }
+                    //先将引擎锁起来，再删除，删除后，再释放锁。为了解决同步的问题
+                    //得到引擎锁
+                    final Engine.EngineLock engineLock = MainActivity.this.getEngine().getEngineLock();
+                    //将引擎锁锁住
+                    engineLock.lock();
+                    //从场景中删除该精灵
+                    mScene.getChildByIndex(LAYER_HERO).detachChild(bullet);
+                    //销毁
+                    bullet.dispose();
+                    //置空
+                    bullet = null;
+                    //解锁
+                    engineLock.unlock();
+                }
+            });
             BufferTime();
             int index = MathUtils.random(1,3);
             this.mBeHealingSound[index].play();
@@ -581,6 +602,9 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
             int index = MathUtils.random(1,3);
             this.mBeAttackSound[index].play();
             this.health--;
+            //受伤后刷新粉脸
+            if(this.health != 3 && this.bullet == null)
+                refreshBullet();
 //            Log.e("log","health == " + this.health);
             switch (health){
                 case 2:
@@ -616,29 +640,6 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 }
             }
         }.start();
-    }
-
-
-
-    private void detachSprite(final Sprite mSprite) {
-                if(mSprite == null){
-                    return ;
-                }
-//先将引擎锁起来，再删除，删除后，再释放锁。为了解决同步的问题
-//得到引擎锁
-               final Engine.EngineLock engineLock = MainActivity.this.getEngine().getEngineLock();
-//将引擎锁锁住
-                engineLock.lock();
-//从场景中删除该精灵
-                mScene.getChildByIndex(LAYER_HERO).detachChild(mSprite);
-//销毁
-                mSprite.dispose();
-//置空
-//                mSprite = null;
-//解锁
-                engineLock.unlock();
-
-        refreshBullet();
     }
 
     private void onGameOver(){
