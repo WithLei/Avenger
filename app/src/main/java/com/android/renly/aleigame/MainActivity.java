@@ -1,9 +1,12 @@
 package com.android.renly.aleigame;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.opengl.GLES20;
 import android.os.Looper;
+import android.os.Vibrator;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -11,14 +14,13 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.afollestad.materialdialogs.color.ColorChooserDialog;
-import com.afollestad.materialdialogs.folderselector.FileChooserDialog;
-import com.afollestad.materialdialogs.folderselector.FolderChooserDialog;
 import com.android.renly.aleigame.constants.AvengerConstants;
+import com.android.renly.aleigame.db.MySQLiteOpenHelper;
 import com.android.renly.aleigame.entity.Box;
 import com.android.renly.aleigame.entity.Bullet;
 import com.android.renly.aleigame.entity.Dj;
 import com.android.renly.aleigame.entity.Enemy;
+import com.android.renly.aleigame.entity.UserScore;
 
 import org.andengine.audio.music.Music;
 import org.andengine.audio.music.MusicFactory;
@@ -68,6 +70,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static com.android.renly.aleigame.db.MySQLiteOpenHelper.TABLE_NAME;
 
 public class MainActivity extends SimpleBaseGameActivity implements AvengerConstants,MenuScene.IOnMenuItemClickListener {
     // 摄像头尺寸
@@ -546,12 +550,16 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 //                "; bulletX = " + this.bullet.getmCellX() + " bulletY = " + this.bullet.getmCellY());
         if(face.getmCellX() < 0 || face.getmCellX() >= CELLS_HORIZONTAL || face.getmCellY() < 0 || face.getmCellY() >= CELLS_VERTICAL) {
             this.onGameOver();
+            Vibrator vibrator = (Vibrator)this.getSystemService(this.VIBRATOR_SERVICE);
+            vibrator.vibrate(3000);
         } else if(face.isInSameCell(this.mBox)) {
             this.mScore += 50;
             this.mScoreText.setText("Score: " + this.mScore);
             int index = MathUtils.random(1,6);
             this.mMunchSound[index].play();
             this.setToRandomCell(this.mBox);
+            Vibrator vibrator = (Vibrator)this.getSystemService(this.VIBRATOR_SERVICE);
+            vibrator.vibrate(500);
         } else if(this.bullet != null && face.isInSameCell(this.bullet) && !isBufferTime){
             Log.e("bullet","refresh");
         //detach sprite
@@ -627,6 +635,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     }
 
     private void BufferTime() {
+        Vibrator vibrator = (Vibrator)this.getSystemService(this.VIBRATOR_SERVICE);
+        vibrator.vibrate(500);
         isBufferTime = true;
         //3秒缓冲时间
         new Thread(){
@@ -653,9 +663,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 }
                 MainActivity.this.mScene.getChildByIndex(LAYER_SCORE).detachChild(mGameOverText);
                 mScene.setChildScene(mMenuScene, false, true, true);
-                Looper.prepare();
                 showInputDialogCustomInvalidation();
-                Looper.loop();
             }
         }.start();
         this.mGameBackgroundSound.pause();
@@ -747,6 +755,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     }
 
     public void showInputDialogCustomInvalidation() {
+        Looper.prepare();
         new MaterialDialog.Builder(MainActivity.this)
                 .title("新高分")
                 .content("请输入昵称")
@@ -761,16 +770,34 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                         0,
                         false,
                         (dialog,input) -> {
-                            if (input.toString().equalsIgnoreCase("hello")) {
-                                dialog.setContent("I told you not to type that!");
+                            if (input.toString().length() > 6) {
+                                dialog.setContent("太长了人家受不了了!");
                                 dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
                             } else {
                                 dialog.setContent(R.string.inputyourname);
                                 dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
                             }
+                            insertDB(input.toString(),this.mScore);
                         }
                 )
                 .show();
+        Looper.loop();
+    }
+
+    private void insertDB(String name,int score) {
+        MySQLiteOpenHelper mySQLiteOpenHelper = new MySQLiteOpenHelper(this);
+        SQLiteDatabase db = mySQLiteOpenHelper.getReadableDatabase();
+        db.beginTransaction();
+
+        UserScore temp = new UserScore(name,score);
+        db.execSQL(insertSql(temp));
+
+        db.setTransactionSuccessful();
+
+    }
+
+    private String insertSql(UserScore temp){
+        return "insert into " + TABLE_NAME + "(name,score) values('" + temp.getUserName() + "','" + temp.getScore() + "')";
     }
 
 }

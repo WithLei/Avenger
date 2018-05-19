@@ -3,4 +3,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="goldenrod">#daa520</color> <!-- 金麒麟色 -->
+    <color name="silver">#c0c0c0</color> <!-- 银色 -->
+    <color name="darkorange">#ff8c00</color> <!-- 暗桔黄色 -->
 </resources>

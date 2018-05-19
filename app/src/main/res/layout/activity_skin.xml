@@ -8,6 +8,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:textSize="50sp"
-        android:text="皮肤选择界面"/>
+        android:text="皮肤施工中"/>
 
 </android.support.constraint.ConstraintLayout>
