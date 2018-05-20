@@ -3,4 +3,31 @@
     <string name="username">爱吃鸡魔人</string>
     <string name="inputyourname">"请输入昵称"</string>
     <string name="crown">\u265A</string>
+
+    <string name="firstName">DJ</string>
+    <string name="secondName">D.VA</string>
+    <string name="thirdName">逃兵：77</string>
+    <string name="fourthName">猎空</string>
+    <string name="fifthName">天使</string>
+
+    <string name="firstIntro">全称：卢西奥•科雷亚•多斯桑托斯， 年龄： 26岁\n
+                            职业：国际DJ、自由战士\n
+                            行动基地：巴西，里约热内卢\n
+                            隶属：无。</string>
+    <string name="secondIntro">全称：宋哈娜，年龄：19岁\n
+                            职业：（前）职业玩家，机甲驾驶员\n
+                            行动基地：韩国，釜山\n
+                            隶属：韩国陆军特别机动部队</string>
+    <string name="thirdIntro">全称：未知，年龄：49岁\n
+                            职业：未知\n
+                            行动基地：未知\n
+                            隶属：（前）守望先锋成员</string>
+    <string name="fourthIntro">全称：莉娜·奥克斯顿， 年龄：26岁\n
+                            职业：冒险家\n
+                            行动基地：英国，伦敦\n
+                            隶属：（前）守望先锋成员</string>
+    <string name="fifthIntro">全称：安吉拉·齐格勒，年龄：37岁\n
+                            职业：战地医师、特派急救员\n
+                            行动基地：瑞士，苏黎世\n
+                            隶属：（前）守望先锋成员</string>
 </resources>

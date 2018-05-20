@@ -214,8 +214,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mBitmapBoxTextureAtlas.load();
 
         this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 32, 32, TextureOptions.BILINEAR);
-        if (skin.equals("DJ"))
-            this.mFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapTextureAtlas, this, "DJ.png", 0, 0);
+        this.mFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapTextureAtlas, this, skin + ".png", 0, 0);
         this.mBitmapTextureAtlas.load();
 
         //敌人
@@ -243,7 +242,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
         //背景贴图
         this.mBackgroundTexture = new BitmapTextureAtlas(this.getTextureManager(), 1024, 512);
-        this.mBackgroundTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBackgroundTexture, this, "background.jpg", 0, 0);
+        this.mBackgroundTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBackgroundTexture, this, "background1.jpg", 0, 0);
         this.mBackgroundTexture.load();
 
         //控制杆贴图

@@ -5,7 +5,7 @@ android {
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "com.android.renly.aleigame"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -39,5 +39,5 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.github.developer-shivam:FeaturedRecyclerView:1.0.0'
     implementation 'com.squareup.picasso:picasso:2.5.2'
-
+    implementation 'com.github.jaouan:compoundlayout:1.0.1'
 }

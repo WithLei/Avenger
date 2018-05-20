@@ -46,7 +46,7 @@ public class LeaderboardActivity extends FragmentActivity {
         mySQLiteOpenHelper = MySQLiteOpenHelper.getInstance(this);
         db = mySQLiteOpenHelper.getWritableDatabase();
         //插入测试
-        insertDB(db);
+//        insertDB(db);
         if (!db.isOpen())
             db = mySQLiteOpenHelper.getReadableDatabase();
         db.beginTransaction();

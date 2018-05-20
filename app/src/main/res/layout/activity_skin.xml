@@ -1,13 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textSize="50sp"
-        android:text="皮肤施工中"/>
+    android:layout_height="match_parent"
+    android:background="@drawable/djbackground"
+    android:id="@+id/ll_skin"
+    android:orientation="vertical">
 
-</android.support.constraint.ConstraintLayout>
+    <com.jaouan.compoundlayout.CompoundLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/checkbox"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="温馨提示：新英雄预购只要998" />
+
+    </com.jaouan.compoundlayout.CompoundLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:textColor="@color/ivory"
+        android:text="请选择你的英雄"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
+        android:paddingEnd="20dp"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:textColor="@color/ivory"
+        android:text="只要你充值的够多，就能玩更imaba的英雄" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.jaouan.compoundlayout.RadioLayoutGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:orientation="horizontal">
+
+            <com.jaouan.compoundlayout.CircleGradientRadioLayout
+                android:id="@+id/profile_1"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:elevation="2dp"
+                app:angle="45"
+                app:checked="true"
+                app:colorA="#AAFFA726"
+                app:colorB="#AAEC407A">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="104dp"
+                    android:src="@drawable/dj" />
+            </com.jaouan.compoundlayout.CircleGradientRadioLayout>
+
+            <com.jaouan.compoundlayout.CircleGradientRadioLayout
+                android:id="@+id/profile_2"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/rounded"
+                android:elevation="2dp"
+                app:colorA="#AA42A5F5"
+                app:colorB="#AAAB47BC">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/dva" />
+            </com.jaouan.compoundlayout.CircleGradientRadioLayout>
+
+            <com.jaouan.compoundlayout.CircleGradientRadioLayout
+                android:id="@+id/profile_3"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/rounded"
+                android:elevation="2dp"
+                app:angle="45"
+                app:colorA="#BBAB47BC"
+                app:colorB="#BBEF5350">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/soldier" />
+            </com.jaouan.compoundlayout.CircleGradientRadioLayout>
+
+            <com.jaouan.compoundlayout.CircleGradientRadioLayout
+                android:id="@+id/profile_4"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/rounded"
+                android:elevation="2dp"
+                app:angle="70"
+                app:colorA="#00FFFFFF"
+                app:colorB="#FF26C6DA">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/switft" />
+            </com.jaouan.compoundlayout.CircleGradientRadioLayout>
+
+            <com.jaouan.compoundlayout.CircleGradientRadioLayout
+                android:id="@+id/profile_5"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/rounded"
+                android:elevation="2dp"
+                app:colorA="#55EF5350"
+                app:colorB="#88EC407A">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/angle" />
+            </com.jaouan.compoundlayout.CircleGradientRadioLayout>
+        </com.jaouan.compoundlayout.RadioLayoutGroup>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/description_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingEnd="20dp"
+            android:paddingStart="20dp"
+            android:paddingTop="20dp"
+            android:text="@string/firstName"
+            android:textColor="@color/ivory"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/tv_intro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"
+            android:paddingEnd="20dp"
+            android:paddingStart="20dp"
+            android:paddingTop="10dp"
+            android:textColor="@color/ivory"
+            android:text="@string/firstIntro" />
+    </LinearLayout>
+
+</LinearLayout>
