@@ -24,12 +24,12 @@ import shivam.developer.featuredrecyclerview.FeaturedRecyclerView;
 
 import static com.android.renly.aleigame.db.MySQLiteOpenHelper.TABLE_NAME;
 
-public class LeaderboardActivity extends FragmentActivity{
+public class LeaderboardActivity extends FragmentActivity {
     List<UserScore> userScores = new ArrayList<>(100);
-    List<String>scores = new ArrayList<>(100);
+    List<String> scores = new ArrayList<>(100);
     FeaturedRecyclerView featuredRecyclerView;
-    MySQLiteOpenHelper mySQLiteOpenHelper;
-    SQLiteDatabase db;
+    private static MySQLiteOpenHelper mySQLiteOpenHelper;
+    private static SQLiteDatabase db;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,54 +43,59 @@ public class LeaderboardActivity extends FragmentActivity{
     }
 
     private void queryDB() {
-        mySQLiteOpenHelper = new MySQLiteOpenHelper(this);
-        db = mySQLiteOpenHelper.getReadableDatabase();
+        mySQLiteOpenHelper = MySQLiteOpenHelper.getInstance(this);
+        db = mySQLiteOpenHelper.getWritableDatabase();
         //插入测试
         insertDB(db);
+        if (!db.isOpen())
+            db = mySQLiteOpenHelper.getReadableDatabase();
+        db.beginTransaction();
+        synchronized (mySQLiteOpenHelper) {
+            //开启查询 获得游标
+            Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
 
-        //开启查询 获得游标
-        Cursor cursor = db.query(TABLE_NAME,null,null,null,null,null,null);
-
-        //判断游标是否为空
-        if(cursor.moveToFirst()){
-            //遍历游标
-            do{
+            //判断游标是否为空
+            if (cursor.moveToFirst()) {
+                //遍历游标
+                do {
 //            Log.e("TAG","i == " + i + "cursor.getcount() ==  " + cursor.getCount());
-                //获得用户名
-                String name = cursor.getString(cursor.getColumnIndex("name"));
-                //获得用户分数
-                int score = cursor.getInt(cursor.getColumnIndex("score"));
-                //test输出
-                Log.e("PRINT","name = " + name + " score = " + score );
+                    //获得用户名
+                    String name = cursor.getString(cursor.getColumnIndex("name"));
+                    //获得用户分数
+                    int score = cursor.getInt(cursor.getColumnIndex("score"));
+                    //test输出
+                    Log.e("PRINT", "name = " + name + " score = " + score);
 
-                UserScore temp = new UserScore(name,score);
-                userScores.add(temp);
-            }while(cursor.moveToNext());
+                    UserScore temp = new UserScore(name, score);
+                    userScores.add(temp);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
         }
-
-
+        db.endTransaction();
+        db.close();
+        mySQLiteOpenHelper.close();
     }
 
     private void insertDB(SQLiteDatabase db) {
-        db.beginTransaction();
+        synchronized (mySQLiteOpenHelper) {
+            db.beginTransaction();
 
-        UserScore temp1 = new UserScore("爱吃鸡魔人",2500);
-        UserScore temp2 = new UserScore("tem",2050);
-        UserScore temp3 = new UserScore("rua",1950);
-        UserScore temp4 = new UserScore("周煜华",9999);
-        UserScore temp5 = new UserScore("啊磊",9998);
+            UserScore temp1 = new UserScore("爱吃鸡魔人", 2500);
+            UserScore temp2 = new UserScore("周煜华", 9999);
+            UserScore temp3 = new UserScore("啊磊", 9998);
 
-        db.execSQL(insertSql(temp1));
-        db.execSQL(insertSql(temp2));
-        db.execSQL(insertSql(temp3));
-        db.execSQL(insertSql(temp4));
-        db.execSQL(insertSql(temp5));
+            db.execSQL(insertSql(temp1));
+            db.execSQL(insertSql(temp2));
+            db.execSQL(insertSql(temp3));
 
-        db.setTransactionSuccessful();
-
+            db.setTransactionSuccessful();
+            db.endTransaction();
+            db.close();
+        }
     }
 
-    private String insertSql(UserScore temp){
+    private String insertSql(UserScore temp) {
         return "insert into " + TABLE_NAME + "(name,score) values('" + temp.getUserName() + "','" + temp.getScore() + "')";
     }
 
@@ -116,17 +121,17 @@ public class LeaderboardActivity extends FragmentActivity{
         Collections.sort(userScores, new Comparator<UserScore>() {
             @Override
             public int compare(UserScore a, UserScore b) {
-                if(a.getScore() > b.getScore())return -1;
+                if (a.getScore() > b.getScore()) return -1;
                 else return 1;
             }
         });
 
-        for(int i = 1;i <= 20;i++ ){
-            if(i <= 3 && userScores.size() >= i)
-                scores.add("\u265A " + userScores.get(i-1).getUserName() + "    " + userScores.get(i-1).getScore());
-            else if(i > 3 && userScores.size() >= i)
-                scores.add(userScores.get(i-1).getUserName() + "    " + userScores.get(i-1).getScore());
-            else if(i <= 3)
+        for (int i = 1; i <= 40; i++) {
+            if (i <= 3 && userScores.size() >= i)
+                scores.add("\u265A " + userScores.get(i - 1).getUserName() + "    " + userScores.get(i - 1).getScore());
+            else if (i > 3 && userScores.size() >= i)
+                scores.add(userScores.get(i - 1).getUserName() + "    " + userScores.get(i - 1).getScore());
+            else if (i <= 3)
                 scores.add("\u265A ----    ----");
             else
                 scores.add(" ----    ----");

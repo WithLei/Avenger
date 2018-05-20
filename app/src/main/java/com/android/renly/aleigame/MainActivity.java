@@ -73,7 +73,7 @@ import java.util.List;
 
 import static com.android.renly.aleigame.db.MySQLiteOpenHelper.TABLE_NAME;
 
-public class MainActivity extends SimpleBaseGameActivity implements AvengerConstants,MenuScene.IOnMenuItemClickListener {
+public class MainActivity extends SimpleBaseGameActivity implements AvengerConstants, MenuScene.IOnMenuItemClickListener {
     // 摄像头尺寸
     private static final int CAMERA_WIDTH = 590;
     private static final int CAMERA_HEIGHT = 359;
@@ -81,12 +81,12 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     //暂停参数
     protected static final int MENU_CONTINUE = 0;
     protected static final int MENU_RESET = MENU_CONTINUE + 1;
-    protected static final int MENU_QUIT= MENU_RESET + 1;
-//    private static final int CAMERA_HEIGHT = CELLS_VERTICAL * CELL_HEIGHT; // 460
+    protected static final int MENU_QUIT = MENU_RESET + 1;
+    //    private static final int CAMERA_HEIGHT = CELLS_VERTICAL * CELL_HEIGHT; // 460
     private Camera mCamera;
 
     // 贴图
-        // 人物贴图
+    // 人物贴图
     private BitmapTextureAtlas mBitmapTextureAtlas;
     private BitmapTextureAtlas mBitmapBoxTextureAtlas;
     private BitmapTextureAtlas mBitmapEnemyTextureAtlas;
@@ -95,18 +95,18 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     private ITextureRegion mBoxTextureRegion;
     private ITextureRegion mEnemyTextureRegion;
     private TiledTextureRegion mBulletTextureRegion;
-         // 背景贴图
+    // 背景贴图
     private BitmapTextureAtlas mBackgroundTexture;
     private ITextureRegion mBackgroundTextureRegion;
-        // 控制杆贴图
+    // 控制杆贴图
     private BitmapTextureAtlas mOnScreenControlTexture;
     private ITextureRegion mOnScreenControlBaseTextureRegion;
     private ITextureRegion mOnScreenControlKnobTextureRegion;
     private AnalogOnScreenControl velocityOnScreenControl;
-        // 暂停键贴图
+    // 暂停键贴图
     private BitmapTextureAtlas mBitmapPauseTextureAtlas;
     private ITextureRegion mPauseTextureRegion;
-        // Hp值贴图
+    // Hp值贴图
     private BitmapTextureAtlas mBitmapHpTextureAtlas;
     private ITextureRegion mHpTextureRegion;
     private BitmapTextureAtlas mBitmapHpDecreaseTextureAtlas;
@@ -177,8 +177,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         // 构建Engine，全屏显示，手机方向为竖屏，按比例拉伸
         final EngineOptions engineOptions = new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mCamera);
         engineOptions.getTouchOptions().setNeedsMultiTouch(true);
-        if(MultiTouch.isSupported(this)) {
-            if(MultiTouch.isSupportedDistinct(this)) {
+        if (MultiTouch.isSupported(this)) {
+            if (MultiTouch.isSupportedDistinct(this)) {
 //                Toast.makeText(this, "MultiTouch detected --> Both controls will work properly!", Toast.LENGTH_SHORT).show();
             } else {
                 this.mPlaceOnScreenControlsAtDifferentVerticalLocations = true;
@@ -210,17 +210,17 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
          */
         //操纵角色
         this.mBitmapBoxTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 32, 32, TextureOptions.BILINEAR);
-        this.mBoxTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapBoxTextureAtlas,this,"box2.png",0,0);
+        this.mBoxTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapBoxTextureAtlas, this, "box2.png", 0, 0);
         this.mBitmapBoxTextureAtlas.load();
 
         this.mBitmapTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 32, 32, TextureOptions.BILINEAR);
-        if(skin.equals("DJ"))
+        if (skin.equals("DJ"))
             this.mFaceTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapTextureAtlas, this, "DJ.png", 0, 0);
         this.mBitmapTextureAtlas.load();
 
         //敌人
-        this.mBitmapEnemyTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),45,45,TextureOptions.BILINEAR);
-        this.mEnemyTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapEnemyTextureAtlas,this,"reaper.png",0,0);
+        this.mBitmapEnemyTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 45, 45, TextureOptions.BILINEAR);
+        this.mEnemyTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapEnemyTextureAtlas, this, "reaper.png", 0, 0);
         this.mBitmapEnemyTextureAtlas.load();
 
         //子弹
@@ -229,47 +229,47 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mBitmapBulletTextureAtlas.load();
 
         //爱心贴图
-        this.mBitmapHpTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),45,45,TextureOptions.BILINEAR);
-        this.mHpTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapHpTextureAtlas,this, "hp.png", 0, 0);
+        this.mBitmapHpTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 45, 45, TextureOptions.BILINEAR);
+        this.mHpTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapHpTextureAtlas, this, "hp.png", 0, 0);
         this.mBitmapHpTextureAtlas.load();
-        this.mBitmapHpDecreaseTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),45,45,TextureOptions.BILINEAR);
-        this.mHpDecreaseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapHpDecreaseTextureAtlas,this, "hpcrease.png", 0, 0);
+        this.mBitmapHpDecreaseTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 45, 45, TextureOptions.BILINEAR);
+        this.mHpDecreaseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapHpDecreaseTextureAtlas, this, "hpcrease.png", 0, 0);
         this.mBitmapHpDecreaseTextureAtlas.load();
 
         //暂停按钮
-        this.mBitmapPauseTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(),64,64,TextureOptions.BILINEAR);
-        this.mPauseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapPauseTextureAtlas,this,"pause.png",0,0);
+        this.mBitmapPauseTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 64, 64, TextureOptions.BILINEAR);
+        this.mPauseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBitmapPauseTextureAtlas, this, "pause.png", 0, 0);
         this.mBitmapPauseTextureAtlas.load();
 
         //背景贴图
-        this.mBackgroundTexture = new BitmapTextureAtlas(this.getTextureManager(),1024,512);
-        this.mBackgroundTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBackgroundTexture,this,"background.jpg",0,0);
+        this.mBackgroundTexture = new BitmapTextureAtlas(this.getTextureManager(), 1024, 512);
+        this.mBackgroundTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mBackgroundTexture, this, "background.jpg", 0, 0);
         this.mBackgroundTexture.load();
 
         //控制杆贴图
-        this.mOnScreenControlTexture = new BitmapTextureAtlas(this.getTextureManager(),256,128,TextureOptions.BILINEAR);
-        this.mOnScreenControlBaseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlTexture,this,"onscreen_control_base.png", 0, 0);
-        this.mOnScreenControlKnobTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlTexture,this,"onscreen_control_knob.png", 128, 0);
+        this.mOnScreenControlTexture = new BitmapTextureAtlas(this.getTextureManager(), 256, 128, TextureOptions.BILINEAR);
+        this.mOnScreenControlBaseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlTexture, this, "onscreen_control_base.png", 0, 0);
+        this.mOnScreenControlKnobTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlTexture, this, "onscreen_control_knob.png", 128, 0);
         this.mOnScreenControlTexture.load();
 
         /* Load all the sounds this game needs. */
         try {
             SoundFactory.setAssetBasePath("mfx/");
             MusicFactory.setAssetBasePath("mfx/");
-            this.mGameBackgroundSound = MusicFactory.createMusicFromAsset(this.getMusicManager(),this,"Victory.ogg");
+            this.mGameBackgroundSound = MusicFactory.createMusicFromAsset(this.getMusicManager(), this, "Victory.ogg");
             this.mGameOverSound = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, "djdie.ogg");
             this.mMunchSound = new Sound[8];
             this.mBeAttackSound = new Sound[4];
             this.mBeHealingSound = new Sound[4];
-            for(int i = 1;i <= 6 ; i++){
+            for (int i = 1; i <= 6; i++) {
                 String path = "dj" + i + ".ogg";
                 this.mMunchSound[i] = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, path);
             }
-            for(int i = 1;i <= 3; i++) {
+            for (int i = 1; i <= 3; i++) {
                 String path = "beattack" + i + ".ogg";
                 this.mBeAttackSound[i] = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, path);
             }
-            for(int i = 1;i <= 3; i++) {
+            for (int i = 1; i <= 3; i++) {
                 String path = "behealing" + i + ".ogg";
                 this.mBeHealingSound[i] = SoundFactory.createSoundFromAsset(this.getSoundManager(), this, path);
             }
@@ -286,12 +286,12 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
 
         this.mScene = new Scene();
-        for(int i = 0;i < LAYER_COUNT;i++){
+        for (int i = 0; i < LAYER_COUNT; i++) {
             this.mScene.attachChild(new Entity());
         }
 
-        final int centerX = (int)(CAMERA_WIDTH - this.mFaceTextureRegion.getWidth()) / 2;
-        final int centerY = (int)(CAMERA_HEIGHT - this.mFaceTextureRegion.getHeight()) / 2;
+        final int centerX = (int) (CAMERA_WIDTH - this.mFaceTextureRegion.getWidth()) / 2;
+        final int centerY = (int) (CAMERA_HEIGHT - this.mFaceTextureRegion.getHeight()) / 2;
         face = new Dj(centerX, centerY, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
         final PhysicsHandler physicsHandler = new PhysicsHandler(face);
         face.registerUpdateHandler(physicsHandler);
@@ -309,7 +309,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.mScoreText);
 
         //补给箱
-        this.mBox = new Box(0,0,this.mBoxTextureRegion,this.getVertexBufferObjectManager());
+        this.mBox = new Box(0, 0, this.mBoxTextureRegion, this.getVertexBufferObjectManager());
         this.setToRandomCell(mBox);
         this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.mBox);
 
@@ -318,20 +318,20 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 //        this.mScene.getChildByIndex(LAYER_HERO).attachChild(this.bullet);
 
         //敌人
-        this.enemy = new Enemy(0,0,this.mEnemyTextureRegion,this.getVertexBufferObjectManager());
+        this.enemy = new Enemy(0, 0, this.mEnemyTextureRegion, this.getVertexBufferObjectManager());
         this.enemy.setmCellX(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH);
         this.enemy.setmCellY(MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
         this.enemy.setmNextX(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH);
         this.enemy.setmNextY(MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
-        this.enemy.setPosition(this.enemy.getmCellX(),this.enemy.getmCellY());
+        this.enemy.setPosition(this.enemy.getmCellX(), this.enemy.getmCellY());
         final PathModifier.Path path = new PathModifier.Path(100).to(this.enemy.getmCellX(), this.enemy.getmCellY()).to(this.enemy.getmNextX(), this.enemy.getmNextY());
-        for(int i = 0;i < 98;i++){
+        for (int i = 0; i < 98; i++) {
             this.enemy.setmNextX(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH);
             this.enemy.setmNextY(MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT);
             path.to(this.enemy.getmNextX(), this.enemy.getmNextY());
         }
         final int enemyDuration;
-        switch (difficulty){
+        switch (difficulty) {
             case "easy":
                 enemyDuration = 150;
                 break;
@@ -383,11 +383,11 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mScene.getChildByIndex(LAYER_COIN).attachChild(this.enemy);
 
         //Hp
-        this.firstHp = new Sprite(350,5,this.mHpTextureRegion,this.getVertexBufferObjectManager());
+        this.firstHp = new Sprite(350, 5, this.mHpTextureRegion, this.getVertexBufferObjectManager());
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.firstHp);
-        this.secondHp = new Sprite(400,5,this.mHpTextureRegion,this.getVertexBufferObjectManager());
+        this.secondHp = new Sprite(400, 5, this.mHpTextureRegion, this.getVertexBufferObjectManager());
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.secondHp);
-        this.thirdHp = new Sprite(450,5,this.mHpTextureRegion,this.getVertexBufferObjectManager());
+        this.thirdHp = new Sprite(450, 5, this.mHpTextureRegion, this.getVertexBufferObjectManager());
         this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.thirdHp);
 
 
@@ -395,7 +395,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mPauseBtn = new ButtonSprite(CAMERA_WIDTH - 70, 5, this.mPauseTextureRegion, this.getVertexBufferObjectManager(), new ButtonSprite.OnClickListener() {
             @Override
             public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                Log.e("log","点击事件");
+                Log.e("log", "点击事件");
                 mScene.setChildScene(mMenuScene, false, true, true);
             }
         });
@@ -458,14 +458,14 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.mScene.registerUpdateHandler(new TimerHandler(0.05f, true, new ITimerCallback() {
             @Override
             public void onTimePassed(final TimerHandler pTimerHandler) {
-                if(MainActivity.this.mGameRunning) {
+                if (MainActivity.this.mGameRunning) {
 //                    try {
 //                        MainActivity.this.mHero.move();
 //                    } catch (final AvengerSuicideException e) {
 //                        MainActivity.this.onGameOver();
 //                    }
 
-                    synchronized(this){
+                    synchronized (this) {
                         MainActivity.this.handleNewHeroPosition();
                     }
                 }
@@ -515,8 +515,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
      * Method
      */
 
-    private void refreshBullet(){
-        new Thread(){
+    private void refreshBullet() {
+        new Thread() {
             @Override
             public void run() {
                 try {
@@ -524,7 +524,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                bullet = new Bullet(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH,MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT,mBulletTextureRegion, getVertexBufferObjectManager());
+                bullet = new Bullet(MathUtils.random(1, CELLS_HORIZONTAL - 2) * CELL_WIDTH, MathUtils.random(1, CELLS_VERTICAL - 2) * CELL_HEIGHT, mBulletTextureRegion, getVertexBufferObjectManager());
                 mScene.getChildByIndex(LAYER_HERO).attachChild(bullet);
             }
         }.start();
@@ -543,31 +543,31 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         this.face.refresh();
         this.mBox.refresh();
         this.enemy.refresh();
-        if(this.bullet != null)
+        if (this.bullet != null)
             this.bullet.refresh();
 
 //        Log.e("log","X = " + (int)((face.getX()+0.5)/CELL_WIDTH)+ "   Y = " + (int)((face.getY()+0.5)/CELL_WIDTH) +
 //                "; bulletX = " + this.bullet.getmCellX() + " bulletY = " + this.bullet.getmCellY());
-        if(face.getmCellX() < 0 || face.getmCellX() >= CELLS_HORIZONTAL || face.getmCellY() < 0 || face.getmCellY() >= CELLS_VERTICAL) {
+        if (face.getmCellX() < 0 || face.getmCellX() >= CELLS_HORIZONTAL || face.getmCellY() < 0 || face.getmCellY() >= CELLS_VERTICAL) {
             this.onGameOver();
-            Vibrator vibrator = (Vibrator)this.getSystemService(this.VIBRATOR_SERVICE);
+            Vibrator vibrator = (Vibrator) this.getSystemService(this.VIBRATOR_SERVICE);
             vibrator.vibrate(3000);
-        } else if(face.isInSameCell(this.mBox)) {
+        } else if (face.isInSameCell(this.mBox)) {
             this.mScore += 50;
             this.mScoreText.setText("Score: " + this.mScore);
-            int index = MathUtils.random(1,6);
+            int index = MathUtils.random(1, 6);
             this.mMunchSound[index].play();
             this.setToRandomCell(this.mBox);
-            Vibrator vibrator = (Vibrator)this.getSystemService(this.VIBRATOR_SERVICE);
+            Vibrator vibrator = (Vibrator) this.getSystemService(this.VIBRATOR_SERVICE);
             vibrator.vibrate(500);
-        } else if(this.bullet != null && face.isInSameCell(this.bullet) && !isBufferTime){
-            Log.e("bullet","refresh");
-        //detach sprite
+        } else if (this.bullet != null && face.isInSameCell(this.bullet) && !isBufferTime) {
+            Log.e("bullet", "refresh");
+            //detach sprite
             runOnUpdateThread(new Runnable() {
                 @Override
                 public void run() {
-                    if(bullet == null){
-                        return ;
+                    if (bullet == null) {
+                        return;
                     }
                     //先将引擎锁起来，再删除，删除后，再释放锁。为了解决同步的问题
                     //得到引擎锁
@@ -585,65 +585,67 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 }
             });
             BufferTime();
-            int index = MathUtils.random(1,3);
+            int index = MathUtils.random(1, 3);
             this.mBeHealingSound[index].play();
             if (this.health < 3)
                 this.health++;
-            switch (health){
+            switch (health) {
                 case 3:
-                    this.thirdHp = new Sprite(450,5,this.mHpTextureRegion,this.getVertexBufferObjectManager());
+                    this.thirdHp = new Sprite(450, 5, this.mHpTextureRegion, this.getVertexBufferObjectManager());
                     this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.thirdHp);
                     break;
                 case 2:
-                    this.secondHp = new Sprite(400,5,this.mHpTextureRegion,this.getVertexBufferObjectManager());
+                    this.secondHp = new Sprite(400, 5, this.mHpTextureRegion, this.getVertexBufferObjectManager());
                     this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.secondHp);
                     break;
                 case 1:
-                    this.firstHp = new Sprite(350,5,this.mHpTextureRegion,this.getVertexBufferObjectManager());
+                    this.firstHp = new Sprite(350, 5, this.mHpTextureRegion, this.getVertexBufferObjectManager());
                     this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.firstHp);
                     break;
             }
 //            Log.e("log","health == " + this.health);
 
-        } else if(face.isInSameCell(this.enemy) && !isBufferTime) {
-            BufferTime();
-            int index = MathUtils.random(1,3);
-            this.mBeAttackSound[index].play();
-            this.health--;
-            //受伤后刷新粉脸
-            if(this.health != 3 && this.bullet == null)
-                refreshBullet();
+        } else if (face.isInSameCell(this.enemy) && !isBufferTime) {
+            synchronized (this) {
+                BufferTime();
+                int index = MathUtils.random(1, 3);
+                this.mBeAttackSound[index].play();
+                this.health--;
+                //受伤后刷新粉脸
+                if (this.health != 3 && this.bullet == null)
+                    refreshBullet();
 //            Log.e("log","health == " + this.health);
-            switch (health){
-                case 2:
-                    this.thirdHp = new Sprite(450,5,this.mHpDecreaseTextureRegion,this.getVertexBufferObjectManager());
-                    this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.thirdHp);
-                    break;
-                case 1:
-                    this.secondHp = new Sprite(400,5,this.mHpDecreaseTextureRegion,this.getVertexBufferObjectManager());
-                    this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.secondHp);
-                    break;
-                case 0:
-                    this.firstHp = new Sprite(350,5,this.mHpDecreaseTextureRegion,this.getVertexBufferObjectManager());
-                    this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.firstHp);
-                    break;
+                switch (health) {
+                    case 2:
+                        this.thirdHp = new Sprite(450, 5, this.mHpDecreaseTextureRegion, this.getVertexBufferObjectManager());
+                        this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.thirdHp);
+                        break;
+                    case 1:
+                        this.secondHp = new Sprite(400, 5, this.mHpDecreaseTextureRegion, this.getVertexBufferObjectManager());
+                        this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.secondHp);
+                        break;
+                    case 0:
+                        this.firstHp = new Sprite(350, 5, this.mHpDecreaseTextureRegion, this.getVertexBufferObjectManager());
+                        this.mScene.getChildByIndex(LAYER_SCORE).attachChild(this.firstHp);
+                        break;
+                }
+                //生命值降为0
+                if (health == 0)
+                    this.onGameOver();
             }
-            //生命值降为0
-            if(health == 0)
-                this.onGameOver();
         }
     }
 
     private void BufferTime() {
-        Vibrator vibrator = (Vibrator)this.getSystemService(this.VIBRATOR_SERVICE);
+        Vibrator vibrator = (Vibrator) this.getSystemService(this.VIBRATOR_SERVICE);
         vibrator.vibrate(500);
         isBufferTime = true;
-        //3秒缓冲时间
-        new Thread(){
+        //1秒缓冲时间
+        new Thread() {
             @Override
             public void run() {
                 try {
-                    sleep(1000);
+                    sleep(1500);
                     isBufferTime = false;
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -652,8 +654,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
         }.start();
     }
 
-    private void onGameOver(){
-        new Thread(){
+    private void onGameOver() {
+        new Thread() {
             @Override
             public void run() {
                 try {
@@ -677,8 +679,8 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
     @Override
     public boolean onKeyDown(final int pKeyCode, final KeyEvent pEvent) {
-        if(pKeyCode == KeyEvent.KEYCODE_MENU && pEvent.getAction() == KeyEvent.ACTION_DOWN) {
-            if(this.mScene.hasChildScene()) {
+        if (pKeyCode == KeyEvent.KEYCODE_MENU && pEvent.getAction() == KeyEvent.ACTION_DOWN) {
+            if (this.mScene.hasChildScene()) {
                 /* Remove the menu and reset it. */
                 this.mMenuScene.back();
             } else {
@@ -693,7 +695,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
 
     @Override
     public boolean onMenuItemClicked(final MenuScene pMenuScene, final IMenuItem pMenuItem, final float pMenuItemLocalX, final float pMenuItemLocalY) {
-        switch(pMenuItem.getID()) {
+        switch (pMenuItem.getID()) {
             case MENU_RESET:
                 /* Restart the animation. */
                 this.mScene.reset();
@@ -710,7 +712,7 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                 this.finish();
                 return true;
             case MENU_CONTINUE:
-                if(!mGameRunning)
+                if (!mGameRunning)
                     return false;
                 this.mMenuScene.back();
                 this.mScene.setChildScene(velocityOnScreenControl);
@@ -733,15 +735,15 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     protected MenuScene createMenuScene() {
         final MenuScene menuScene = new MenuScene(this.mCamera);
 
-        final IMenuItem resetMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_RESET, this.mFont, "Restart", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(1,1,1));
+        final IMenuItem resetMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_RESET, this.mFont, "Restart", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1, 0, 0), new org.andengine.util.color.Color(1, 1, 1));
         resetMenuItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(resetMenuItem);
 
-        final IMenuItem quitMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_QUIT, this.mFont, "Quit", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1,0,0), new org.andengine.util.color.Color(1,1,1));
+        final IMenuItem quitMenuItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_QUIT, this.mFont, "Quit", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1, 0, 0), new org.andengine.util.color.Color(1, 1, 1));
         quitMenuItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(quitMenuItem);
 
-        final IMenuItem continueItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_CONTINUE, this.mFont, "Continue",this.getVertexBufferObjectManager()),new org.andengine.util.color.Color(1,0,0),new org.andengine.util.color.Color(1,1,1));
+        final IMenuItem continueItem = new ColorMenuItemDecorator(new TextMenuItem(MENU_CONTINUE, this.mFont, "Continue", this.getVertexBufferObjectManager()), new org.andengine.util.color.Color(1, 0, 0), new org.andengine.util.color.Color(1, 1, 1));
         continueItem.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         menuScene.addMenuItem(continueItem);
 
@@ -764,39 +766,37 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
                                 | InputType.TYPE_TEXT_VARIATION_PERSON_NAME
                                 | InputType.TYPE_TEXT_FLAG_CAP_WORDS)
                 .positiveText("确认")
-                .alwaysCallInputCallback() // this forces the callback to be invoked with every input change
+                .inputRange(2, 12)
                 .input(
                         R.string.username,
                         0,
                         false,
-                        (dialog,input) -> {
-                            if (input.toString().length() > 6) {
-                                dialog.setContent("太长了人家受不了了!");
-                                dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
-                            } else {
-                                dialog.setContent(R.string.inputyourname);
-                                dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
-                            }
-                            insertDB(input.toString(),this.mScore);
-                        }
-                )
+                        (dialog, input) -> insertDB(input.toString(), this.mScore))
                 .show();
         Looper.loop();
     }
 
-    private void insertDB(String name,int score) {
-        MySQLiteOpenHelper mySQLiteOpenHelper = new MySQLiteOpenHelper(this);
-        SQLiteDatabase db = mySQLiteOpenHelper.getReadableDatabase();
-        db.beginTransaction();
+    private static MySQLiteOpenHelper mySQLiteOpenHelper;
+    private static SQLiteDatabase db;
 
-        UserScore temp = new UserScore(name,score);
-        db.execSQL(insertSql(temp));
+    private void insertDB(String name, int score) {
+        mySQLiteOpenHelper = MySQLiteOpenHelper.getInstance(this);
+        synchronized (mySQLiteOpenHelper) {
+            db = mySQLiteOpenHelper.getWritableDatabase();
+            db.beginTransaction();
 
-        db.setTransactionSuccessful();
+            UserScore temp = new UserScore(name, score);
+            db.execSQL(insertSql(temp));
 
+            db.setTransactionSuccessful();
+
+            db.endTransaction();
+            db.close();
+            mySQLiteOpenHelper.close();
+        }
     }
 
-    private String insertSql(UserScore temp){
+    private String insertSql(UserScore temp) {
         return "insert into " + TABLE_NAME + "(name,score) values('" + temp.getUserName() + "','" + temp.getScore() + "')";
     }
 
