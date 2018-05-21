@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/menubackground">
+    android:background="@drawable/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,120 +18,83 @@
             android:textColor="#696969"
             android:textSize="17sp" />
 
+        <Button
+            android:id="@+id/btn_easy_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="80dp"
+            android:padding="10dp"
+            android:background="@drawable/btn_bg_blue"
+            android:layout_gravity="right"
+            android:text="简单模式"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp" />
+
+        <Button
+            android:id="@+id/btn_hard_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="80dp"
+            android:padding="10dp"
+            android:background="@drawable/btn_bg_orange"
+            android:layout_gravity="right"
+            android:text="困难模式"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp" />
+
+
+        <Button
+            android:id="@+id/btn_fxxk_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="80dp"
+            android:padding="10dp"
+            android:background="@drawable/btn_bg_red"
+            android:layout_gravity="right"
+            android:text="地狱模式"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="3dp"
-            android:layout_margin="5dp"
-            android:layout_marginTop="100dp"
-            android:background="@drawable/text_background">
-
-            <Button
-                android:id="@+id/btn_easy_mode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="?android:attr/selectableItemBackground"
-                android:text="简单模式"
-                android:textColor="#87ceeb"
-                android:textSize="25sp" />
-        </LinearLayout>
-
-        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="20dp"
+            android:layout_gravity="right|bottom"
+            android:orientation="horizontal">
+        <Button
+            android:id="@+id/btn_skin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="3dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/text_background">
+            android:background="?android:attr/selectableItemBackground"
+            android:text="英雄"
+            android:drawableLeft="@drawable/skin"
+            android:textColor="#FF6633"
+            android:textSize="20sp" />
 
-            <Button
-                android:id="@+id/btn_hard_mode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="?android:attr/selectableItemBackground"
-                android:text="困难模式"
-                android:textColor="#ff7f50"
-                android:textSize="25sp" />
-        </LinearLayout>
-
-        <LinearLayout
+        <Button
+            android:id="@+id/btn_Leaderboard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="3dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/text_background">
+            android:background="?android:attr/selectableItemBackground"
+            android:text="排行榜"
+            android:layout_marginRight="15dp"
+            android:drawableLeft="@drawable/leadership"
+            android:textColor="#DAA520"
+            android:textSize="20sp" />
 
-            <Button
-                android:id="@+id/btn_fxxk_mode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="?android:attr/selectableItemBackground"
-                android:text="地狱模式"
-                android:textColor="#FF0000"
-                android:textSize="25sp" />
-        </LinearLayout>
-
-        <LinearLayout
+        <Button
+            android:id="@+id/btn_config"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="50dp"
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/text_background">
-
-            <Button
-                android:id="@+id/btn_skin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="?android:attr/selectableItemBackground"
-                android:text="英雄"
-                android:textColor="#DAA520"
-                android:textSize="25sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="3dp"
-            android:layout_margin="5dp"
-            android:layout_gravity="center"
-            android:background="@drawable/text_background">
-
-            <Button
-                android:id="@+id/btn_Leaderboard"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="?android:attr/selectableItemBackground"
-                android:text="排行榜"
-                android:textColor="#c71585"
-                android:textSize="25sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="5dp"
-            android:background="@drawable/text_background">
-
-            <Button
-                android:id="@+id/btn_config"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="?android:attr/selectableItemBackground"
-                android:text="设置"
-                android:textColor="#f8f8ff"
-                android:textSize="25sp" />
+            android:background="?android:attr/selectableItemBackground"
+            android:text="设置"
+            android:drawableLeft="@drawable/config"
+            android:textColor="#AC44FD"
+            android:textSize="20sp" />
         </LinearLayout>
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>

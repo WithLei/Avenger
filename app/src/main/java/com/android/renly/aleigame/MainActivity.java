@@ -2,11 +2,15 @@ package com.android.renly.aleigame;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.opengl.GLES20;
+import android.os.Bundle;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.os.Vibrator;
+import android.support.annotation.Nullable;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -169,6 +173,13 @@ public class MainActivity extends SimpleBaseGameActivity implements AvengerConst
     //接收Intent数据
     private String skin;
     private String difficulty;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//横屏
+
+    }
 
     @Override
     public EngineOptions onCreateEngineOptions() {

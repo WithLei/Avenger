@@ -2,6 +2,7 @@ package com.android.renly.aleigame.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -87,10 +88,17 @@ public class MenuActivity extends FragmentActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//横屏
         setContentView(getLayoutId());
         initView();
         initListener();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         initData();
+        Log.e("LOG","onResume");
     }
 
     private void initData() {
