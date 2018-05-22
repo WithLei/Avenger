@@ -1,9 +1,16 @@
 # Avenger
 [![GitHub stars](https://img.shields.io/github/stars/WithLei/Avenger.svg)](https://github.com/WithLei/Avenger/stargazers) [![GitHub forks](https://img.shields.io/github/forks/WithLei/Avenger.svg)](https://github.com/WithLei/Avenger/network) [![GitHub license](https://img.shields.io/github/license/WithLei/Avenger.svg)](https://github.com/WithLei/Avenger/blob/master/LICENSE)
 
-This is a collection game that moves your fingers so your hero can get more gold coins!
+>This is a collection game that moves your fingers so your hero can get more gold coins!
+>But be careful not to die...
 
-But be careful not to die...
+
+## DEMO
+![menu](https://github.com/WithLei/Avenger/blob/master/screen/menu.png)
+![skin](https://github.com/WithLei/Avenger/blob/master/screen/skin.gif)
+![game](https://github.com/WithLei/Avenger/blob/master/screen/game.gif)
+![leaderboard](https://github.com/WithLei/Avenger/blob/master/screen/leaderboard.png)
+![leaderboard](https://github.com/WithLei/Avenger/blob/master/screen/leaderboard.gif)
 
 ## Installation
 
