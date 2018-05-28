@@ -6,7 +6,9 @@ But be careful not to die...
 
 ## Project Intro
 个人开源2D Android游戏项目，使用强大的AndAngine引擎,基于java语言开发，使用 OpenGL ES进行图形绘制。数据的存储读取使用轻型的数据库SQLite，能够有效处理并发以及保证数据的安全，同时使用了Google开发的框架volley，实现了图片加载的异步请求。
+
 开源地址：https://github.com/WithLei/Avenger
+
 下载链接：https://github.com/WithLei/Avenger/releases/download/2.0.0.0/app.apk
 【目前最新2.0版本】
 
