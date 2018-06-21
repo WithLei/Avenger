@@ -84,12 +84,10 @@ public class LeaderboardActivity extends FragmentActivity {
             db.beginTransaction();
 
             UserScore temp1 = new UserScore("爱吃鸡魔人", 2500);
-            UserScore temp2 = new UserScore("周煜华", 9999);
-            UserScore temp3 = new UserScore("啊磊", 9998);
+            UserScore temp2 = new UserScore("啊磊", 9998);
 
             db.execSQL(insertSql(temp1));
             db.execSQL(insertSql(temp2));
-            db.execSQL(insertSql(temp3));
 
             db.setTransactionSuccessful();
             db.endTransaction();
